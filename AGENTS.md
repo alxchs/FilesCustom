@@ -109,3 +109,15 @@ Code Quality: Add source-generated settings serialization
 ```
 
 For the PR body, follow `./.github/PULL_REQUEST_TEMPLATE.md`.
+
+
+## Files Custom (regras do fork)
+
+Este checkout é o **Files Custom**, derivado do Files Community. Além das diretrizes acima:
+
+- Leia `MASTER_SPEC.md` (seções da tarefa), `AGENT_CONTEXT.md` (estado atual) e `docs/agents/CONTINUITY.md` (como Claude e AGY se revezam sem perder trabalho) antes de agir.
+- Nenhuma feature (F001+) antes do gate G0: baseline oficial compilado, aberto e com smoke test registrado em `STATUS.md`.
+- Sem task brief em `docs/agents/tasks/`, não comece feature. Melhoria fora do escopo vira `DISCOVERY`, não código.
+- Declare `NOT TESTED`, `OBSERVED`, `INFERRED` ou `CONFIRMED`; nunca invente resultado.
+- Commit local a cada passo verde; ao parar, escreva handoff em `docs/agents/handoffs/`. `git push` só com confirmação do Alexandre.
+- Mantenha o diff pequeno e isolado em arquivos próprios para acompanhar o upstream (`MASTER_SPEC.md` §13).
