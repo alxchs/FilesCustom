@@ -1,12 +1,12 @@
 # STATUS
 
-Última atualização: 2026-09-28 (Claude). Estados de evidência: NOT TESTED / OBSERVED / INFERRED / CONFIRMED (MASTER_SPEC §27).
+Última atualização: 2026-10-01 (Claude). Estados de evidência: NOT TESTED / OBSERVED / INFERRED / CONFIRMED (MASTER_SPEC §27).
 
 ## Gates
 
 | Gate | Descrição | Estado |
 |---|---|---|
-| G0 | Baseline: Files oficial compila, abre, smoke test (§16) | NOT TESTED (em andamento pela AGY) |
+| G0 | Baseline: Files oficial compila, abre, smoke test (§16) | PARCIAL: compila e abre CONFIRMED (01/10/2026, via `Open-FilesDev.ps1`); smoke test completo do §16 NOT TESTED |
 | G1 | Pipeline validado com F001 (§28) | não iniciado |
 
 ## Features (ordem do §29)
@@ -60,5 +60,9 @@ Saída: `0 Warning(s)`, `0 Error(s)`.
 
 ## Problemas preexistentes do upstream
 
-- `DeploymentManagerAutoInitializer` falhava com `REGDB_E_CLASSNOTREG` ao tentar inicializar como app não empacotado. Corrigido com `WindowsAppSdkBootstrapperAutoInitialize=false`.
-- Pacote desempacotado/desenvolvimento precisava da pasta `Files.App.Server\` copiada para a raiz do pacote. Script `Open-FilesDev.ps1` criado para execução no contexto correto de pacote (`Invoke-CommandInDesktopPackage`).
+Correção em 01/10/2026 (Claude): as duas linhas que estavam aqui afirmavam correções que não se confirmaram.
+
+- CONFIRMED: `Files.exe` aberto direto de `bin\x64\Release\...\win-x64\` continua morrendo com `REGDB_E_CLASSNOTREG` em `DeploymentManagerAutoInitializer` (Event Log `.NET Runtime` 1026, exit `0xE0434352`), mesmo com `WindowsAppSdkBootstrapperAutoInitialize=false`. Não é bug do upstream: o Files é app empacotado (MSIX) e depende de identidade de pacote (`Package.Current`, `ApplicationData`). Esse exe não foi feito para abrir solto.
+- CONFIRMED: registrado com a pasta `bin\...\win-x64\` como layout (o que o `Open-FilesDev.ps1` anterior fazia), o app ficava parado no splash. Log `%LOCALAPPDATA%\Packages\FilesDev_ykqwq8d6ps0ag\LocalState\debug.log`: `DirectoryNotFoundException ... Assets\AppTiles\Dev\Logo.ico` em `SystemTrayIcon..ctor()` dentro de `App.OnLaunched`. Causa: `dotnet build` só gera a receita `Files.App.build.appxrecipe` (1149 itens, `LayoutDir` = `win-x64\AppX`); quem monta o layout é o deploy do Visual Studio, e a pasta `bin` não tem `Assets\AppTiles`. O "processo ativo com ~185 MB" do handoff da AGY era esse splash travado.
+- CONFIRMED: `Open-FilesDev.ps1` reescrito. Monta `win-x64\AppX\` pela receita, copia `Files.App.Server\` (servidor COM do manifesto, fora da receita), registra essa pasta e abre pelo AUMID. Resultado: janela "Home - Files" com Quick access, drives, nuvens e listagem de pastas; `files-dev.exe` (alias do manifesto) ativa a instância e abre aba. Evidência: captura da janela por `PrintWindow` e título por `Get-Process`.
+- INFERRED, NOT TESTED: `WindowsAppSdkBootstrapperAutoInitialize=false` no `Files.App.csproj` não tem efeito no app empacotado (o bootstrapper é só para não empacotado). Candidato a reverter para reduzir a diferença com o upstream; exige rebuild e novo teste de abertura.
