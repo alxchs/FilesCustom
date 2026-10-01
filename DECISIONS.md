@@ -36,6 +36,12 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 - **Trade-offs:** GitHub não permite fork privado de repositório público; o fork é **público**. Nada foi enviado. Um `git push` publicaria `MASTER_SPEC.md`, `STATUS.md` etc.; só com confirmação do Alexandre (regra global). Alternativa: repositório privado sem vínculo de fork.
 - **Consequences:** o histórico do upstream vem junto (baixado localmente). `core.symlinks=false` porque o `CLAUDE.md` do upstream é symlink.
 
+## D-007 — Desempenho: a referência é o OneCommander (01/10/2026)
+
+- **Context:** o Files Dev abriu (G0 parcial) e o Alexandre o achou lento em quase tudo: abrir o app, entrar em pastas, rolagem/miniaturas, cliques e menus. Ele quer substituir o OneCommander.
+- **Decision (Alexandre):** a meta de desempenho é ficar melhor que o OneCommander nas mesmas ações. Comparar com o Files oficial não interessa.
+- **Consequences:** desempenho vira trilha própria (F007), medida pelos scripts de `tools/perf/`, com linha de base em `tools/perf/README.md`. Cada otimização precisa mostrar o antes/depois com os mesmos scripts. Continua valendo D-002 (Claude define brief e critério; AGY implementa) e o gate G0.
+
 ## PENDING DECISION
 
 (Dúvidas que a AGY encontrar enquanto o Claude estiver parado: contexto, opções, a escolha que ela faria e por quê.)

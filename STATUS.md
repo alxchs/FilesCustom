@@ -69,8 +69,8 @@ Correção em 01/10/2026 (Claude): as duas linhas que estavam aqui afirmavam cor
 
 ## DISCOVERY
 
-- **D-PERF-01 — Files Dev percebido como lento (01/10/2026, Alexandre).** Abrir o app, entrar em pastas, rolagem/miniaturas e cliques/menus: tudo mais lento que o Explorer e o OneCommander. Decisão: NEEDS MORE INVESTIGATION.
+- **D-PERF-01 — Files Dev percebido como lento (01/10/2026, Alexandre).** Abrir o app, entrar em pastas, rolagem/miniaturas e cliques/menus: tudo mais lento que o Explorer e o OneCommander. Decisão: IMPLEMENT como F007 (D-007, meta: superar o OneCommander). Linha de base e scripts em `tools/perf/`.
   - OBSERVED (processo em uso, ~5 min): 2 min 06 s de CPU acumulada, 514 MB de working set, 411 MB privados, 65 threads, 3089 handles; ocioso em 1,4% de CPU. Máquina: 12 núcleos, 16 GB, sem outro processo acima de 3,3% de CPU.
   - CONFIRMED: o build não está sem otimização: `AppX\Files.dll` é o ReadyToRun de `obj\...\R2R` (13,5 MB, contra 5,9 MB do IL), configuração Release. O GC Satori não entra no build empacotado (`Satori.targets` desliga com `EnableMsixTooling=true`).
   - INFERRED, NOT TESTED: parte do custo vem de pastas desta máquina: `C:\desenv` é pasta do Google Drive (status de sincronização por item) e tem repositórios git (o log registra `LibGit2Sharp ... remote authentication required` ao navegar).
-  - NOT TESTED: se o Files oficial (Store) é igualmente lento nesta máquina. É o próximo passo: medir as mesmas ações nos dois. Se o oficial for igual, é custo do upstream e vira trilha de desempenho com brief próprio; se este build for pior, procurar a diferença de build (WindowsAppSDK 2.5.1 contra 2.4.0, layout, configuração).
+  - OBSERVED (`tools/perf/`, 01/10/2026): contra o OneCommander, o Files gasta 1,7× a 1,9× de CPU para abrir pastas, 3,4× de memória e 18× de CPU parado. Parado, 74% da CPU vai para a thread "DWM Compositor Thread"; ao abrir a pasta de 10 mil arquivos, 59%.
