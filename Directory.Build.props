@@ -1,8 +1,9 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <Project>
   <PropertyGroup>
 
     <!--  Generic properties  -->
+    <Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU'">x64</Platform>
     <TargetFrameworkVersion>net10.0</TargetFrameworkVersion>
     <TargetWindowsVersion>10.0.26100.0</TargetWindowsVersion>
     <MinimalWindowsVersion>10.0.19041.0</MinimalWindowsVersion>

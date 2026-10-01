@@ -1,4 +1,4 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
@@ -25,6 +25,10 @@
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <SelfContained>false</SelfContained>
         <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+        <WindowsAppSdkBootstrapperAutoInitialize>false</WindowsAppSdkBootstrapperAutoInitialize>
+        <!-- CS8305: WinUI experimental APIs (ContentExternalOutputLink) used intentionally for tab-strip/windowing -->
+        <!-- NU1903: SQLite vulnerability accepted from upstream; track GHSA-2m69-gcr7-jv3q for upgrade -->
+        <NoWarn>$(NoWarn);CS8305;NU1903</NoWarn>
         <UseWinUI>true</UseWinUI>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
