@@ -9,3 +9,12 @@ tab_width = 4
 indent_style = tab
 indent_size = 4
 tab_width = 4
+
+# Auto-generated XAML code-behind — do not edit directly
+# CS0618/CS0612: generated bindings reference APIs marked obsolete in the source
+# CS0108: generated members may re-declare interface members
+[**/*.g.cs]
+generated_code = true
+dotnet_diagnostic.CS0618.severity = none
+dotnet_diagnostic.CS0612.severity = none
+dotnet_diagnostic.CS0108.severity = none

@@ -1,4 +1,4 @@
-// Copyright (c) Files Community
+﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 using Files.Shared.Helpers;
@@ -231,8 +231,8 @@ namespace Files.App.Utils.Shell
 								if (!hFileSrc.IsInvalid && !hFileDst.IsInvalid)
 								{
 									// Copy ADS to temp folder and open
-									await using (var inStream = new FileStream(hFileSrc.DangerousGetHandle(), FileAccess.Read))
-									await using (var outStream = new FileStream(hFileDst.DangerousGetHandle(), FileAccess.Write))
+									await using (var inStream = new FileStream(new Microsoft.Win32.SafeHandles.SafeFileHandle(hFileSrc.DangerousGetHandle(), ownsHandle: false), FileAccess.Read))
+									await using (var outStream = new FileStream(new Microsoft.Win32.SafeHandles.SafeFileHandle(hFileDst.DangerousGetHandle(), ownsHandle: false), FileAccess.Write))
 									{
 										await inStream.CopyToAsync(outStream);
 										await outStream.FlushAsync();

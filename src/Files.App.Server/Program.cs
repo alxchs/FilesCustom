@@ -24,6 +24,7 @@ class Program
 
 		_ = PInvoke.RoInitialize(RO_INIT_TYPE.RO_INIT_MULTITHREADED);
 
+#pragma warning disable IL2026 // Assembly.GetTypes() required to discover WinRT-activatable COM classes at runtime; server is not trimmed
 		var classIds = typeof(Program).Assembly.GetTypes()
 			.Where(t => t.IsSealed && t.IsPublic && t.IsClass)
 			.Select(t => t.FullName!)

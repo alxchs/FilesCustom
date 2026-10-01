@@ -1,5 +1,6 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0618 // MenuFlyoutHelper marked obsolete upstream; migrate when replacement API is stable
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

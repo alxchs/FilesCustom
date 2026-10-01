@@ -1,5 +1,6 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0612 // FileThumbnailHelper.LoadIconFromPathAsync obsolete; migrate to GetIconAsync when ImagingService is refactored
 
 using Files.Shared.Utils;
 using Microsoft.Extensions.Logging;

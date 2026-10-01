@@ -1,5 +1,6 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // SPDX-License-Identifier: MPL-2.0
+#pragma warning disable CS0612 // RecycleBinWatcher obsolete; migrate when replacement is available
 
 namespace Files.App.Data.Contracts
 {

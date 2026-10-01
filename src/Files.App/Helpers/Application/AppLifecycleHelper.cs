@@ -1,5 +1,6 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0618 // NativeStorageLegacyService obsolete; migrate to WindowsStorable when ready
 
 using Files.App.Helpers.Application;
 using Files.App.Services.Git;

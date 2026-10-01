@@ -1,11 +1,11 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 namespace Files.App.Services.SizeProvider
 {
 	public sealed partial class NoSizeProvider : ISizeProvider
 	{
-		public event EventHandler<SizeChangedEventArgs>? SizeChanged;
+		public event EventHandler<SizeChangedEventArgs>? SizeChanged { add { } remove { } }
 
 		public Task CleanAsync() => Task.CompletedTask;
 		public Task ClearAsync() => Task.CompletedTask;

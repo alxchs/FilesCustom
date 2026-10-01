@@ -1,5 +1,6 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0612 // RecycleBinWatcher obsolete; migrate when replacement is available
 
 using System.IO;
 using System.Runtime.InteropServices;

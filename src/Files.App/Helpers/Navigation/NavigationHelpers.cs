@@ -1,5 +1,6 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0618 // Omnibar APIs: migrate when feature leaves experimental
 
 using Files.Shared.Helpers;
 using Microsoft.UI.Xaml.Controls;

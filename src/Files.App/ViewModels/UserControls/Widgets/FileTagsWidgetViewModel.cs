@@ -1,4 +1,4 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
@@ -28,7 +28,9 @@ namespace Files.App.ViewModels.UserControls.Widgets
 
 		// Events
 
+		#pragma warning disable CS0067 // Event subscribed externally (HomePageContext) but raise logic not yet implemented
 		public static event EventHandler<IEnumerable<WidgetFileTagCardItem>>? SelectedTaggedItemsChanged;
+		#pragma warning restore CS0067
 
 
 		// Constructor

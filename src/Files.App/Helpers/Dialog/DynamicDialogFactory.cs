@@ -1,4 +1,4 @@
-// Copyright (c) Files Community
+﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 using Files.App.Dialogs;
@@ -116,7 +116,7 @@ namespace Files.App.Helpers
 					for (int i = 0; i < 20; i++)
 					{
 						if (inputText.XamlRoot is not null &&
-							Microsoft.UI.Xaml.Input.FocusManager.GetFocusedElement(inputText.XamlRoot) == inputText)
+							Microsoft.UI.Xaml.Input.FocusManager.GetFocusedElement(inputText.XamlRoot) as TextBox == inputText)
 							return;
 
 						inputText.Focus(FocusState.Programmatic);

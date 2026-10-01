@@ -1,5 +1,6 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
+#pragma warning disable CS0618 // Omnibar APIs: migrate when feature leaves experimental
 
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
@@ -122,7 +123,7 @@ namespace Files.App.Views.Shells
 			CurrentPageType != typeof(HomePage) &&
 			CurrentPageType != typeof(ReleaseNotesPage) &&
 			CurrentPageType != typeof(SettingsPage) &&
-			(PaneHolder is null || !PaneHolder.IsMultiPaneActive || PaneHolder.ActivePane == this);
+			(PaneHolder is null || !PaneHolder.IsMultiPaneActive || ReferenceEquals(PaneHolder.ActivePane, this));
 
 		protected TabBarItemParameter? _TabItemArguments;
 		public TabBarItemParameter? TabBarItemParameter
