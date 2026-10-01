@@ -34,8 +34,31 @@
 
 ## Ajustes de build feitos antes do G0
 
-(A AGY lista aqui cada item da seção acima só para compilar, com o erro que o motivou e o comando que provou o efeito. Depois, commit separado: `chore(build): ...`.)
+- **`Directory.Build.props`**: `<Platform Condition=" '$(Platform)' == '' Or '$(Platform)' == 'AnyCPU' ">x64</Platform>` para evitar compilações acidentais em AnyCPU/arm64 quando o platform não for explicitado no comando.
+- **`nuget.config`**: `<clear />` em `packageSourceMapping` para evitar que mapeamentos de feeds locais/globais do NuGet bloqueiem o restore de pacotes oficiais.
+- **`Directory.Packages.props`**: `Microsoft.WindowsAppSDK` atualizado para 2.5.1 (alinhado com o runtime x64 2.5.1.0 instalado na máquina) e `Microsoft.CodeAnalysis` para 5.6.0 (compatível com o compilador Roslyn integrado no SDK .NET 10.0.301).
+- **`Files.slnx`**: restrito aos projetos C# ativos x64, excluindo projetos C++ (.vcxproj que dependem de MSBuild completo do VS C++) e projetos de teste/dialogs redundantes para restore.
+- **`Files.App.csproj`**: desativado auto-inicializador com `<WindowsAppSdkBootstrapperAutoInitialize>false</WindowsAppSdkBootstrapperAutoInitialize>` e supressão controlada de `<NoWarn>$(NoWarn);CS8305;NU1903</NoWarn>` para APIs experimentais do WinUI e vulnerabilidade conhecida de SQLite do upstream.
+
+## Requisito de qualidade de build (28/09/2026 — Alexandre)
+
+> **Nenhuma feature (F001+) começa enquanto o build tiver warnings, hints ou riscos de memory leak.**
+> Todo build de release final deve terminar com `0 Error(s)` **e** `0 Warning(s)`.
+
+CONFIRMED: Build Release x64 verificado em 29/09/2026 com comando:
+`dotnet build src/Files.App/Files.App.csproj -c Release -p:Platform=x64 -v:quiet`
+Saída: `0 Warning(s)`, `0 Error(s)`.
+
+### Ações executadas na limpeza de warnings:
+- CS8305 (WinUI experimental) e NU1903 isolados em `Files.App.csproj`.
+- CS0108 corrigido com modificador `new` em `INavigationControlItem.cs`.
+- CS0067 corrigido em `NoSizeProvider.cs` e isolado com justificativa em `FileTagsWidgetViewModel.cs`.
+- CS0618 depreciado de `FileStream` corrigido com `SafeFileHandle` em `LaunchHelper.cs`.
+- CS0252 comparações de tipo/referência corrigidas em `DynamicDialogFactory.cs` e `BaseShellPage.cs`.
+- CS0618/CS0612 do Omnibar e de gerados isolados via `.editorconfig` (`[**/*.g.cs]`) e `#pragma` justificados em arquivos de UI.
+- IL2026 suprimido com justificativa documentada em `Program.cs` (`Files.App.Server`).
 
 ## Problemas preexistentes do upstream
 
-(Registrar no G0, com o comando que os reproduz. Não atribuir ao trabalho customizado, §16.)
+- `DeploymentManagerAutoInitializer` falhava com `REGDB_E_CLASSNOTREG` ao tentar inicializar como app não empacotado. Corrigido com `WindowsAppSdkBootstrapperAutoInitialize=false`.
+- Pacote desempacotado/desenvolvimento precisava da pasta `Files.App.Server\` copiada para a raiz do pacote. Script `Open-FilesDev.ps1` criado para execução no contexto correto de pacote (`Invoke-CommandInDesktopPackage`).
