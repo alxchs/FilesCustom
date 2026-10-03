@@ -81,3 +81,9 @@ Correção em 01/10/2026 (Claude): as duas linhas que estavam aqui afirmavam cor
   - CONFIRMED: o build não está sem otimização: `AppX\Files.dll` é o ReadyToRun de `obj\...\R2R` (13,5 MB, contra 5,9 MB do IL), configuração Release. O GC Satori não entra no build empacotado (`Satori.targets` desliga com `EnableMsixTooling=true`).
   - INFERRED, NOT TESTED: parte do custo vem de pastas desta máquina: `C:\desenv` é pasta do Google Drive (status de sincronização por item) e tem repositórios git (o log registra `LibGit2Sharp ... remote authentication required` ao navegar).
   - OBSERVED (`tools/perf/`, 01/10/2026): contra o OneCommander, o Files gasta 1,7× a 1,9× de CPU para abrir pastas, 3,4× de memória e 18× de CPU parado. Parado, 74% da CPU vai para a thread "DWM Compositor Thread"; ao abrir a pasta de 10 mil arquivos, 59%.
+
+## Metodologia comum (03/10/2026)
+
+- CONFIRMED: a metodologia geral saiu deste projeto para `C:\Users\alxch\.dev-method\METODO.md` (com modelos e `Novo-Projeto.ps1`); `~/.claude/CLAUDE.md` importa o arquivo e `~/.gemini/GEMINI.md` manda a AGY lê-lo. Aqui ficam só as regras do Files Custom (`MASTER_SPEC.md`, `docs/agents/CONTINUITY.md`, `docs/agents/PLAYBOOK.md`).
+- CONFIRMED: `WindowsAppSdkBootstrapperAutoInitialize=false` não existe mais em `Files.App.csproj` (o merge adotou o upstream: `grep Bootstrapper src/Files.App/Files.App.csproj` sem resultado) e o app abre. A pendência "reverter essa flag" está encerrada.
+- NOT TESTED: se a AGY lê o `~/.gemini/GEMINI.md` e o `GEMINI.md` do projeto (D-005); o prompt de disparo deve continuar mandando ler os arquivos explicitamente.

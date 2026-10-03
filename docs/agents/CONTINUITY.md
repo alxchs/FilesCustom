@@ -2,6 +2,8 @@
 
 Complementa `MASTER_SPEC.md` (§20–27). Objetivo: se um agente parar (cota, erro, sessão encerrada), o outro continua **sem inventar contexto e sem perder trabalho**.
 
+> **Metodologia geral** (papéis, arquivos de continuidade, briefs, handoffs, estados de evidência, tags, forks, medição) está em `C:\Users\alxch\.dev-method\METODO.md`, comum a todos os projetos. Este arquivo mantém só o que é do Files Custom. O passo a passo para a AGY seguir sozinha está em `docs/agents/PLAYBOOK.md`. Onde este texto repete o METODO, vale o METODO.
+
 ## Princípio
 
 A memória de uma conversa não conta. Só existe o que está em arquivo no repositório: código, commits, `AGENT_CONTEXT.md`, `STATUS.md`, `DECISIONS.md`, `docs/agents/`. Quem não escreveu lá, não deixou para o outro.

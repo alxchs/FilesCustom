@@ -9,10 +9,10 @@ CURRENT PHASE  G0 — Baseline & Zero-Warning Gate
 CURRENT TASK   G0: smoke test do §16 (Open-FilesDev.ps1) e F007-A: A/B do backdrop (docs/agents/tasks/F007-perf-ab-backdrop.md)
 ACCEPTANCE     Build x64 Release com 0 erros/0 warnings (feito); app abre (CONFIRMED 01/10); smoke §16 registrado em STATUS.md
 DO NOT CHANGE  Nenhum código de produto em src/ e tests/ além do necessário para compilar e limpar warnings. Não editar OneCommander (só observar pela UI, §3.1)
-OWNER          AGY (tarefa G0)
+OWNER          AGY (fila do PLAYBOOK); Claude em pausa a pedido do Alexandre (03/10/2026)
 CURRENT BRANCH main (base: upstream/main 0e3c17ca4, D-008)
 LAST DECISION  D-001..D-008 em DECISIONS.md (D-008, 03/10/2026: base migrada para upstream/main)
-NEXT ACTION    1) AGY: F007-A + G0-smoke-test (briefs em docs/agents/tasks/)  2) AGY: OC-rename-exploration  3) Claude: aprovar F001-rename-ux depois do rename.md  4) Decidir reverter WindowsAppSdkBootstrapperAutoInitialize
+NEXT ACTION    Seguir a fila de docs/agents/PLAYBOOK.md: 1) F007-A  2) G0 smoke  3) OC-rename  4) F001 (pré-aprovado)  5) explorações F003/F005/F002/F004/F006
 BLOCKER        Nenhum
-LAST UPDATE    2026-10-03 — Claude (D-008: base agora é upstream/main 0e3c17ca4; refazer baseline/medições nesta base)
+LAST UPDATE    2026-10-03 — Claude (PLAYBOOK + METODO comum em ~/.dev-method; briefs F007-A, G0, OC-rename, F001)
 ```
