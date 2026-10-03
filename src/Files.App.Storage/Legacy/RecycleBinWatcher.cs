@@ -18,7 +18,9 @@ namespace Files.App.Storage.Watchers
 		public event EventHandler<SystemIO.FileSystemEventArgs>? ItemDeleted;
 
 		/// <inheritdoc/>
+#pragma warning disable CS0067 // Required by the watcher interface; the Recycle Bin watcher never raises it
 		public event EventHandler<SystemIO.FileSystemEventArgs>? ItemChanged;
+#pragma warning restore CS0067
 
 		/// <inheritdoc/>
 		public event EventHandler<SystemIO.FileSystemEventArgs>? ItemRenamed;

@@ -526,6 +526,7 @@ namespace Files.App.Controls
 			VisualStateManager.GoToState(this, IsExpanded ? "ExpandedIconPressed" : "CollapsedIconPressed", true);
 		}
 
+		[WinRT.DynamicWindowsRuntimeCast(typeof(Microsoft.UI.Xaml.UIElement))]
 		private void Item_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
 		{
 			if (!isClicking)

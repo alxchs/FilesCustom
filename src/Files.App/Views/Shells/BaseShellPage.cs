@@ -458,7 +458,9 @@ namespace Files.App.Views.Shells
 		{
 			var queryText = e.QueryText
 				?? throw new InvalidOperationException("The submitted navigation query is missing.");
+#pragma warning disable CS0618 // Upstream still routes Omnibar submits through the legacy toolbar path handler
 			await ToolbarViewModel.CheckPathInputAsync(queryText, ToolbarViewModel.PathComponents.LastOrDefault()?.Path, this);
+#pragma warning restore CS0618
 		}
 
 		protected async void DrivesManager_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -820,7 +822,9 @@ namespace Files.App.Views.Shells
 		protected void SelectSidebarItemFromPath(Type? incomingSourcePageType = null)
 		{
 			if (incomingSourcePageType == typeof(HomePage))
+#pragma warning disable CS0618 // Upstream still sets the legacy toolbar path text here
 				ToolbarViewModel.PathControlDisplayText = Strings.Home.GetLocalizedResource();
+#pragma warning restore CS0618
 		}
 
 		[DynamicWindowsRuntimeCast(typeof(Frame))]
