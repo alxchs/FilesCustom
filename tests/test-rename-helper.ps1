@@ -26,7 +26,15 @@ public class RenameHelperTests {
             (".env", false, false, ".env", ""),
             (".env.local", false, false, ".env", ".local"),
             ("Folder A", true, false, "Folder A", ""),
-            ("shortcut.lnk", false, true, "shortcut.lnk", "")
+            ("shortcut.lnk", false, true, "shortcut.lnk", ""),
+            ("arquivo.txt.", false, false, "arquivo.txt.", ""),
+            ("ARQUIVO.TAR.GZ", false, false, "ARQUIVO", ".TAR.GZ"),
+            (".tar.gz", false, false, ".tar", ".gz"),
+            ("a.b.c", false, false, "a.b", ".c"),
+            ("", false, false, "", ""),
+            ("archive.tar.bz2", false, false, "archive", ".tar.bz2"),
+            ("archive.tar.xz", false, false, "archive", ".tar.xz"),
+            ("archive.tar.zst", false, false, "archive", ".tar.zst")
         };
         int failed = 0;
         foreach (var c in cases) {
@@ -37,6 +45,9 @@ public class RenameHelperTests {
             } else {
                 Console.WriteLine($"[PASS] '{c.input}' -> Name='{res.NamePart}', Ext='{res.ExtensionPart}', HasExt={res.HasExtension}");
             }
+        }
+        if (failed == 0) {
+            Console.WriteLine($"\nAll {cases.Length} test cases passed successfully.");
         }
         return failed;
     }
@@ -49,6 +60,5 @@ if ($res -ne 0) {
     Write-Error "Tests failed: $res failures."
     exit 1
 } else {
-    Write-Host "`nAll 12 test cases passed successfully." -ForegroundColor Green
     exit 0
 }

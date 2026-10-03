@@ -34,7 +34,6 @@ namespace Files.App.Helpers
 			".tar.lzo",
 			".tar.z",
 			".tar.7z",
-			".user.js",
 		};
 
 		public static FileNameParts Split(string? fileName, bool isFolder = false, bool isShortcut = false)

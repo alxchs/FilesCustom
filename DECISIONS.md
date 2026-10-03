@@ -72,3 +72,16 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 - **Reason:** a falha da AGY nao foi cota nem 5 tentativas; foi bloqueio de disparo. Excecao pontual e autorizada a regra "a AGY faz, o Claude nunca termina por ela".
 - **Trade-offs:** os achados MAJOR de comportamento (tecla End destrava a extensao; `showExtensionDialog` suprimido em arquivo sem extensao) **continuam abertos** na AGY, em `docs/agents/reviews/2026-10-03_Claude_revisao-F001-wip.md`.
 - **Consequences:** `mkfile release src\Files.App\Files.App.csproj` = 0 Warning(s), 0 Error(s) (03/10/2026 18:29). App aberto por `Open-FilesDev.ps1`.
+
+## D-011 — F001: Correcao de comportamento (End, dialogo, Tab, clique e edge cases) (03/10/2026)
+
+- **Context:** Revisao `docs/agents/reviews/2026-10-03_Claude_revisao-F001-wip.md` apontou 2 achados MAJOR restantes (End e clique fora da extensao destravavam a extensao; `showExtensionDialog` suprimido para arquivos sem extensao) e MINORs (Tab em arquivo sem extensao, `.user.js` na lista de compostas, cobertura de testes do helper).
+- **Decision:**
+  1. No `RenameTextBox_KeyDown`, a tecla `End` e `Down` limitam a selecao a `nameLen` quando a extensao estiver travada; em `SelectionChanged`, qualquer posicao do cursor alem de `nameLen` e truncada de volta para `nameLen` a menos que tenha havido clique de mouse explicitamente dentro dos limites da extensao (`PointerPressed` com medicao do texto da extensao).
+  2. Em `CommitRenameAsync`, o dialogo de extensao so e suprimido se `IsExtensionDeliberatelyModified == true`. Arquivo sem extensao (`arquivo` -> `arquivo.exe`) preserva `IsExtensionDeliberatelyModified = false` e exibe o dialogo modal Sim/Nao.
+  3. `Tab` em item sem extensao (`!ActiveRenameParts.HasExtension`) e no-op (`e.Handled = true`).
+  4. `.user.js` removido de `CompoundExtensions` (mantendo apenas compressoes `.tar.*`).
+  5. Casos de borda no helper: dotfiles com multiplos pontos (`.env.local`, `.tar.gz` sem prefixo) tratam o ultimo segmento como extensao (`.local`, `.gz`), permitindo editar o nome base e protegendo a extensao final. Nomes terminando com ponto (`arquivo.txt.`) tem extensao vazia. Testes do helper ampliados para 20 casos cobrindo todos os cenarios.
+  6. `Tab` seleciona a extensao sem o ponto inicial para agilizar a substituicao direta.
+- **Consequences:** `mkfile release src\Files.App\Files.App.csproj` resulta em 0 Warning(s) e 0 Error(s). Todos os 20 casos de teste passam com sucesso.
+
