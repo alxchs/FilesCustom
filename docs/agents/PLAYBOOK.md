@@ -23,8 +23,8 @@ Se a fila acabar: `DISCOVERY` em `STATUS.md`, handoff, `AGENT_CONTEXT.md` atuali
 ## Pré-aprovado (decida sem perguntar)
 
 - **F001:** opção A do brief (manter o TextBox único e blindar a extensão: nome selecionável, extensão travada até gesto deliberado, regras para dotfile e extensão dupla). Só passe para a opção B (dois campos) se o `rename.md` mostrar que A não resolve a queixa original. Marque o brief como `APROVADO (pré-aprovação do PLAYBOOK)` antes de codar. Branch `feature/rename-ux`.
-- **F003:** `New Tab` abre Home (ou o local padrão configurado) e `Duplicate Tab` é ação separada (§7). Só crie opção de configuração se o `Files` ainda não tiver uma equivalente (§33). Branch `feature/new-vs-duplicate-tab`.
-- **F005:** comandos `Toggle Preview Pane` / `Toggle Details Pane` / `Toggle Info Pane` com nomes do vocabulário do Files, acessíveis por atalho e Command Palette (§9). Reutilize `IAction`/`RichCommand` existentes. Branch `feature/preview-details-shortcuts`.
+- **F003:** brief aprovado `docs/agents/tasks/F003-new-vs-duplicate-tab.md`. A análise do Claude mostrou que o Files já separa Ctrl+T (Home) de Duplicar (Ctrl+Shift+K): a tarefa é confirmar no app e registrar; **não** criar a opção New Tab Behavior (DISCOVERY, IMPLEMENT LATER).
+- **F005:** brief aprovado `docs/agents/tasks/F005-preview-details-toggle.md` (Toggle Preview/Details de um passo, Alt+P / Alt+Shift+P, no Command Palette; edição só em `Actions/Show/`). Branch `feature/preview-details-shortcuts`.
 - **F007:** se o A/B mostrar que o fundo (Mica Alt) explica a CPU do compositor, **proponha** a correção mínima no brief; implementar só com aprovação do Claude. Se não explicar, abra novo `DISCOVERY` com o próximo suspeito e meça-o.
 - Nomes de arquivos novos: em arquivos próprios, comentários mínimos, strings via `Strings.resx` (localização), CRLF, `.editorconfig` do repo.
 - Warning novo em build de release: corrigir antes de seguir, supressão só escopada com motivo.
