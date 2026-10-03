@@ -45,10 +45,10 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 ## D-008 — Base migrada do upstream v4.2.9 para upstream/main (03/10/2026)
 
 - **Context:** o `main` do fork no GitHub foi sincronizado com o upstream (127 commits à frente de v4.2.9, nenhum do Alexandre ou da AGY). O local estava em v4.2.9.
-- **Decision (Alexandre):** trazer o upstream agora e ajustar. Tag de segurança `tag_v1.5.0.0_pre-merge-upstream_salvo` criada antes (publicada em origin).
+- **Decision (Alexandre):** trazer o upstream agora e ajustar. Tag de segurança `tag_v4.2.9.0_pre-merge-upstream_salvo` criada antes (publicada em origin).
 - **Reason:** quanto mais tarde, mais conflito. Antes de F001+ a base precisa ser a atual.
 - **Trade-offs:** o baseline do G0 e as medições de `tools/perf/` foram feitos no v4.2.9 e precisam ser refeitos nesta base. 7 conflitos, todos resolvidos com a versão do upstream (as supressões de warning da AGY nesses pontos foram descartadas e reavaliadas). Roslyn continua fixado em 5.6.0 porque o compilador do SDK 10.0.301 é 5.6.0 (o 5.9.0 do upstream dá CS9057).
-- **Consequences:** voltar atrás = `git reset --hard tag_v1.5.0.0_pre-merge-upstream_salvo`.
+- **Consequences:** voltar atrás = `git reset --hard tag_v4.2.9.0_pre-merge-upstream_salvo`.
 
 ## PENDING DECISION
 
