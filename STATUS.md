@@ -14,13 +14,14 @@
 | Gate | Descrição | Estado |
 |---|---|---|
 | G0 | Baseline: Files oficial compila, abre, smoke test (§16) | CONCLUÍDO (CONFIRMED 03/10/2026: compila 0/0, abre por `Open-FilesDev.ps1`, itens 1 a 9 do smoke test §16 validados com capturas) |
-| G1 | Pipeline validado com F001 (§28) | não iniciado |
+| G1 | Pipeline validado com F001 (§28) | em andamento (OC-rename concluído, iniciando F001) |
 
 ## Features (ordem do §29)
 
 | ID | Feature | Estado | Branch |
 |---|---|---|---|
-| F001 | Rename UX | não iniciado (aguarda G0) | feature/rename-ux |
+| F001 | Rename UX | em andamento (OC-rename concluído, brief aprovado) | feature/rename-ux |
+
 | F003 | Nova aba vs duplicar | não iniciado | feature/new-vs-duplicate-tab |
 | F005 | Preview / Details | não iniciado | feature/preview-details-shortcuts |
 | F002 | Colunas | não iniciado | feature/independent-column-resize |
@@ -149,3 +150,18 @@ Ambiente: Windows 11 x64 (12 núcleos, 16 GB), display 2560×1440 em DPI 150%. P
    - Estado: `CONFIRMED`.
    - Evidência: Processo encerrado e reaberto via `.\Open-FilesDev.ps1`. O app lê `"ContinueLastSessionOnStartUp": true` em `user_settings.json`, restaura as abas da sessão anterior (`Downloads`), restaura o layout Details com colunas preservadas e mantém o estado fechado do InfoPane.
    - Capturas: `tools/perf/captures/smoke_item9_reopened.png`, `tools/perf/captures/smoke_item9_reopened_ready.png`.
+
+## Exploração OneCommander — Renomeação (OC-rename, 03/10/2026)
+
+- Estado: `CONFIRMED`.
+- Documento de referência de UX: `docs/ux-reference/onecommander/rename.md` (conforme MASTER_SPEC §18 e §19).
+- Evidências (16+ capturas em alta resolução): `docs/ux-reference/onecommander/evidence/rename/`.
+- Diagnóstico da queixa histórica do Alexandre (*"a experiência de renomeação fica ruim quando a extensão precisa ser alterada"*):
+  1. O OneCommander usa um único campo de texto (TextBox) dentro de um ComboBox com sugestões automáticas.
+  2. Ao acionar F2 (ou clique-pausa), seleciona apenas o nome base e deixa a extensão desmarcada.
+  3. Pressionar `Tab` **não** foca a extensão: confirma o nome atual e pula para renomear o próximo arquivo da pasta.
+  4. Para mudar a extensão, o usuário precisa navegar com setas ou mouse até o fim do campo e apagar a extensão manualmente.
+  5. Ao confirmar com Enter uma extensão alterada, o OneCommander altera o arquivo, mas dispara um toast reativo e paternalista no canto inferior direito: *"The file extension is different. Do you want to add the original extension back? <arquivo>.<nova_ext>.<antiga_ext>"*.
+  6. Em dotfiles (`.gitignore`), o cálculo de extensão do OneCommander falha gravemente: seleciona 0 caracteres e posiciona o cursor na frente do ponto (`|.gitignore`).
+  7. Em extensões duplas (`arquivo.tar.gz`), considera apenas `.gz` como extensão e inclui `.tar` na seleção.
+- Decisão / Direcionamento para F001: Opção A (manter campo único, blindar extensão contra edições acidentais de Backspace/Delete, permitir desbloqueio deliberado por Tab / tecla dedicada com substituição imediata, e suporte nativo correto a dotfiles e extensões compostas).
