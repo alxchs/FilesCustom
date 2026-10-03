@@ -11,12 +11,18 @@ Escrito pelo Claude em 03/10/2026. Metodologia geral: `C:\Users\alxch\.dev-metho
 
 ## Fila (em ordem; marque cada item no `STATUS.md` ao concluir)
 
-1. **F007-A** (feito pela AGY, revisado pelo Claude em 03/10) e **F007-B** — `docs/agents/tasks/F007-B-compositor-idle.md`: bisseccionar o que mantém o compositor acordado (fundo Solid como base).
-2. **G0 smoke** — `docs/agents/tasks/G0-smoke-test-base-upstream.md`. Fecha o gate G0.
-3. **OC-rename** — `docs/agents/tasks/OC-rename-exploration.md`. Observar o OneCommander e escrever `docs/ux-reference/onecommander/rename.md`.
-4. **F001 Rename UX** — `docs/agents/tasks/F001-rename-ux.md` (ver "Pré-aprovado").
-5. **Explorações do OneCommander + análise do Files (§40, §41), uma feature por vez, nesta ordem:** F003 abas, F005 preview/details, F002 colunas, F004 menus, F006 busca. Saída: `docs/ux-reference/onecommander/<feature>.md` (modelo do §18) e um brief em rascunho em `docs/agents/tasks/`.
-6. **F003 (confirmar), F005 (implementar)**; F002 (investigação por teste), F004 (análise + protótipo) e F006 fase 1 (benchmark) têm brief em rascunho em `docs/agents/tasks/` e param no gate do Claude antes de codar.
+**Ordem vigente desde 03/10/2026 (MASTER_SPEC §46, substitui a ordem anterior; ordem completa em §46 "Nova ordem de execução").**
+
+Feito: F007-A, G0 (smoke), OC-rename (exploração). Em andamento: **F001**.
+
+1. **F001 Rename UX** — `docs/agents/tasks/F001-rename-ux.md` (aprovado, opção A). Termine com testes, handoff e commit na `feature/rename-ux`.
+2. **F005** — `F005-preview-details-toggle.md` (implementar). Em seguida **F003** — `F003-new-vs-duplicate-tab.md` (só confirmar e registrar).
+3. **F008 Modo compacto** — `F008-compact-density.md` (análise, depois implementação). Depois **F009 Fontes separadas** — `F009-separate-fonts.md`.
+4. **F002 Colunas** — `F002-independent-column-resize.md` (investigação por teste, sem código). Depois **F010 Todas as colunas do Explorer** — `F010-all-explorer-columns.md` (fase 1: investigação; **para no gate do Claude**).
+5. **F004 Menu clássico** — `F004-classic-menu-bar.md` (análise + protótipo; para no gate).
+6. **F006 infraestrutura de busca** — `F006-search-provider.md` fase 1 (benchmark) e **F011 escolha de motor** — `F011-search-engine-choice.md` fase 1 (provar Everything e Agent Ransack **sem abrir a tela deles**; para no gate).
+7. **F007-B** — `F007-B-compositor-idle.md` (medição, pode intercalar com os itens acima quando a tela estiver livre).
+8. Novas explorações do OneCommander (lista de tópicos do Alexandre ainda não entregue) viram briefs de exploração.
 
 Se a fila acabar: `DISCOVERY` em `STATUS.md`, handoff, `AGENT_CONTEXT.md` atualizado e pare.
 

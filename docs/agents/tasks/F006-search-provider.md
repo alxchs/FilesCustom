@@ -46,3 +46,5 @@ Indexador próprio, busca de conteúdo própria, redesenho da UI de busca.
 ## ENTREGA
 
 Fase 1: `docs/test-plans/search-benchmark.md` + scripts, handoff, commit local, sem push. Pare ao fim da fase 1 e registre `PENDING DECISION` pedindo a aprovação do desenho.
+
+> Atualização 03/10/2026: esta fase é a infraestrutura de busca. A escolha do motor pelo usuário (Native / Agent Ransack / Everything no F3) está em `F011-search-engine-choice.md` (MASTER_SPEC §46).

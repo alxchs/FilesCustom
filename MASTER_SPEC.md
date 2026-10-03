@@ -1381,3 +1381,56 @@ O resultado final deve ser um aplicativo próprio, sustentável e tecnicamente b
 
 - OneCommander — termos e licença:  
   https://www.onecommander.com/terms
+
+---
+
+# 46. Requisitos adicionais: configurações e busca (Alexandre, 03/10/2026)
+
+Acrescentado por pedido do Alexandre, registrado em `DECISIONS.md` (D-009). O §33 diz "criar configuração só com razão legítima": estas quatro **têm** razão legítima porque foram pedidas expressamente. Cada uma vira feature com brief em `docs/agents/tasks/`. Itens de configuração entram na tela de Settings existente, com strings localizáveis, e **o padrão não muda o comportamento atual do Files** (quem não mexe vê o mesmo app).
+
+## F008 — Modo compacto (menor entrelinhamento)
+
+Objetivo: reduzir a altura das linhas e o espaçamento vertical para caber mais itens na tela.
+
+- Opção de configuração de densidade que valha para a **lista de arquivos** (Details, List, Columns, Grid onde fizer sentido) e para as **áreas fixas** (barra lateral, abas, barra de ferramentas, barra de status).
+- O Files já tem tamanhos por layout (`DetailsViewSizeKind.Compact` = 28 px de linha no Details, o menor hoje). O requisito é ir **além** do Compact atual (linha mais baixa, espaçamento interno menor) e aplicar a densidade também às áreas fixas, que hoje não têm opção. O upstream tem uma branch de trabalho de densidade da barra lateral (`ya/CompactSpacing`); ler antes de implementar e preferir alinhar com ela para reduzir conflito futuro (§13).
+- Critério: legibilidade preservada (fonte e ícone proporcionais), alvo de clique mínimo documentado, DPI 100/150%, acessibilidade (§32), sem corte de texto. Medir quantas linhas cabem antes/depois na mesma janela.
+
+## F009 — Fonte das áreas fixas separada da fonte dos resultados
+
+Objetivo: poder escolher uma fonte (família e tamanho) para as **áreas fixas** (menus, barra lateral, abas, barra de ferramentas, barra de status, diálogos) diferente da fonte da **lista de resultados** (nomes de arquivo e colunas).
+
+- Hoje existe uma única fonte global (`AppearanceSettingsService.AppThemeFontFamily`, aplicada por `AppThemeResourcesHelper`). O requisito é separar em duas configurações independentes, com padrão = fonte atual para as duas.
+- Tamanho opcional por grupo. Aplicar sem reiniciar o app. Fonte inexistente cai no padrão sem quebrar.
+- Critério: trocar uma não muda a outra; persiste entre sessões; funciona nos três layouts e na barra de menus da F004.
+
+## F010 — Todas as colunas do Windows Explorer
+
+Objetivo: o usuário poder incluir no layout Details **qualquer coluna que o Windows Explorer oferece** (a lista "More..." do Explorer: Autor, Álbum, Dimensões, Duração, Taxa de bits, Data de captura, Câmera, Marca, e as centenas de propriedades do Windows Property System), além das colunas atuais do Files.
+
+- Fonte dos dados: o Property System do Windows (propriedades `System.*` e as de formato). Enumerar as propriedades visualizáveis (`PSEnumeratePropertyDescriptions`) e ler o valor de cada item (`IPropertyStore`/`IShellItem2`) pelo CsWin32, sem P/Invoke ad hoc (AGENTS.md). **Validar na investigação** que isso reproduz a lista do Explorer; se não, documentar a diferença.
+- Interface: seletor de colunas (como o "More..." do Explorer) com busca e agrupamento; as escolhas persistem por pasta/tipo de pasta como já ocorre com as colunas atuais.
+- Desempenho: ler propriedades **só das linhas visíveis** e de forma assíncrona e com cancelamento; cache; nunca na UI thread; testar a pasta de 10 mil arquivos (§31). Ordenação e agrupamento por coluna nova são desejáveis, mas podem vir em fase posterior.
+- Dependência: F002 (larguras) e o modelo de colunas (`ColumnsViewModel`, hoje com um conjunto fixo de propriedades `DetailsLayoutColumnItem`). A mudança central é passar a um modelo **dinâmico** de colunas: decisão de arquitetura do Claude antes de codar.
+
+## F011 — Motor de busca escolhido pelo usuário no F3 (e Ctrl+F)
+
+Objetivo: o atalho de busca (hoje `F3` e `Ctrl+F` ligados ao `SearchAction`) usar o motor que o usuário escolher nas configurações: **Busca nativa do Files**, **Agent Ransack** ou **Everything**.
+
+- **Sem abrir a tela do outro programa.** Os resultados voltam para a lista do próprio Files. Usar o motor deles em segundo plano:
+  - Everything: pelo IPC/SDK oficial (o Everything 1.4.1.1032 já está instalado e em execução nesta máquina, OBSERVED). Verificar se precisa do `Everything64.dll` do SDK (licença MIT, redistribuível) ou implementar o protocolo de mensagens via CsWin32; avaliar o que é compatível com NativeAOT.
+  - Agent Ransack: está instalado (versão 9.2.3425.1, `C:\Program Files\Mythicsoft\Agent Ransack`) com `flpsearch.exe` e `flpidx.exe` (INFERRED: motor de linha de comando do mesmo fabricante). **NOT TESTED**: descobrir os parâmetros do `flpsearch.exe` e se ele devolve resultados em texto estruturado sem abrir janela; se não houver modo silencioso, registrar e propor alternativa (por exemplo, só busca de conteúdo).
+  - Nativa: o `FolderSearch` atual, inalterado.
+- A configuração tem um valor por motor e mostra a disponibilidade (instalado/não instalado/não respondendo). Motor indisponível cai na busca nativa com aviso discreto, nunca erro (§10). Rótulo/ícone indica qual motor está ativo na caixa de busca.
+- Sobrepõe a F006: a **F006 passa a ser a infraestrutura** (abstração `ISearchProvider`, benchmark) e a F011 é a **escolha pelo usuário e os dois provedores externos**. Ver `docs/agents/tasks/F006-search-provider.md` e `F011-search-engine-choice.md`.
+
+## Nova ordem de execução (substitui o §29 a partir de 03/10/2026)
+
+1. F001 Rename UX (em andamento) → F005 Preview/Details → F003 abas (confirmar, já atendido).
+2. F008 Modo compacto → F009 Fontes separadas (pequenas, valor diário imediato, tocam em recursos/estilos).
+3. F002 Colunas (investigação por teste) → **F010 Todas as colunas** (depende do modelo dinâmico de colunas).
+4. F004 Menu clássico (os itens F008/F009 precisam funcionar nele).
+5. F006 infraestrutura de busca → F011 escolha de motor (Everything e Agent Ransack).
+6. F007 desempenho em paralelo (medição, sem código) e DISCOVERY.
+
+Racional: itens pequenos e de baixo risco primeiro; os dois de arquitetura mais pesada (colunas dinâmicas e busca) depois de F002/F006 darem o desenho.

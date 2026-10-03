@@ -53,3 +53,12 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 ## PENDING DECISION
 
 (Dúvidas que a AGY encontrar enquanto o Claude estiver parado: contexto, opções, a escolha que ela faria e por quê.)
+
+## D-009 — Requisitos adicionais: densidade, fontes, colunas do Explorer e motor de busca (03/10/2026)
+
+- **Context:** o Alexandre pediu quatro itens de configuração: modo compacto (menor entrelinhamento), fonte das áreas fixas separada da fonte dos resultados, todas as colunas que o Windows Explorer oferece, e escolher se o F3 usa a busca do Files, o Agent Ransack ou o Everything, sem abrir a tela deles. Autorizou reordenar tudo.
+- **Decision:** acrescentados ao `MASTER_SPEC.md` como §46 (F008 a F011), com briefs em `docs/agents/tasks/`. Nova ordem de execução no §46 e no `PLAYBOOK.md`. F006 passa a ser a infraestrutura de busca e a F011 é a escolha de motor.
+- **Reason:** são pedidos expressos, logo têm "razão legítima" para configuração (§33). F008/F009 são pequenos e de baixo risco; F010 exige modelo dinâmico de colunas e a F011 depende de `ISearchProvider`.
+- **Trade-offs:** o spec original (D-001) era "verbatim"; esta seção é a primeira alteração, registrada aqui. Colunas dinâmicas (F010) e busca externa (F011) aumentam o diff contra o upstream; mitigação: arquivos próprios e fases com gate do Claude.
+- **Consequences:** a lista no §29 está superada pelo §46. Nenhuma configuração muda o comportamento padrão.
+- **Fatos verificados em 03/10/2026:** F3 e Ctrl+F já estão em `SearchAction`; linha mínima do Details é 28 px; fonte global única `AppThemeFontFamily`; Everything 1.4.1.1032 e Agent Ransack 9.2.3425.1 (com `flpsearch.exe`) instalados. O que é INFERRED/NOT TESTED está marcado nos briefs.
