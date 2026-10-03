@@ -472,10 +472,12 @@ namespace Files.App.Views.Layouts
 				return;
 
 			var textBox = listViewItem.FindDescendant("ItemNameTextBox") as TextBox;
-			if (textBox is null || textBox.FindParent<Grid>() is null)
+			if (textBox is null || textBox.FindParent<Grid>() is not Grid parentGrid)
 				return;
 
-			Grid.SetColumnSpan(textBox.FindParent<Grid>(), 8);
+			Grid.SetColumnSpan(parentGrid, 8);
+			parentGrid.MinWidth = Math.Max(260, parentGrid.ActualWidth);
+			textBox.MinWidth = 220;
 		}
 
 		private void ItemNameTextBox_BeforeTextChanging(TextBox textBox, TextBoxBeforeTextChangingEventArgs args)
@@ -495,7 +497,11 @@ namespace Files.App.Views.Layouts
 		protected override void EndRename(TextBox textBox)
 		{
 			if (textBox is not null && textBox.FindParent<Grid>() is FrameworkElement parent)
+			{
 				Grid.SetColumnSpan(parent, 1);
+				parent.ClearValue(FrameworkElement.MinWidthProperty);
+				textBox.ClearValue(FrameworkElement.MinWidthProperty);
+			}
 
 			ListViewItem? listViewItem = FileList.ContainerFromItem(RenamingItem) as ListViewItem;
 
@@ -510,12 +516,8 @@ namespace Files.App.Views.Layouts
 				textBlock!.Visibility = Visibility.Visible;
 			}
 
-			// Unsubscribe from events
-			if (textBox is not null)
-			{
-				textBox!.LostFocus -= RenameTextBox_LostFocus;
-				textBox.KeyDown -= RenameTextBox_KeyDown;
-			}
+			// Unsubscribe from events and reset rename state
+			ResetRenameState(textBox);
 
 			FileNameTeachingTip.IsOpen = false;
 			IsRenamingItem = false;

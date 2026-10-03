@@ -434,8 +434,6 @@ namespace Files.App.Views.Layouts
 			if (RenamingItem is null || FolderSettings is null)
 				return;
 
-			int extensionLength = RenamingItem.FileExtension?.Length ?? 0;
-
 			if (FileList.ContainerFromItem(RenamingItem) is not GridViewItem gridViewItem)
 				return;
 
@@ -507,11 +505,7 @@ namespace Files.App.Views.Layouts
 			activeTextBox.LostFocus += RenameTextBox_LostFocus;
 			activeTextBox.KeyDown += RenameTextBox_KeyDown;
 
-			int selectedTextLength = editText.Length;
-			if (!RenamingItem.IsShortcut && (ShouldShowExtensionInRename(RenamingItem) || UserSettingsService.FoldersSettingsService.ShowFileExtensions))
-				selectedTextLength -= extensionLength;
-
-			activeTextBox.Select(0, selectedTextLength);
+			InitializeRenameSelection(activeTextBox, editText, RenamingItem);
 			IsRenamingItem = true;
 
 			renameTextBox = activeTextBox;
@@ -573,12 +567,8 @@ namespace Files.App.Views.Layouts
 				}
 			}
 
-			// Unsubscribe from events
-			if (textBox is not null)
-			{
-				textBox.LostFocus -= RenameTextBox_LostFocus;
-				textBox.KeyDown -= RenameTextBox_KeyDown;
-			}
+			// Unsubscribe from events and reset rename state
+			ResetRenameState(textBox);
 
 			FileNameTeachingTip.IsOpen = false;
 			IsRenamingItem = false;

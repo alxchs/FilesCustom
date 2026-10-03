@@ -294,12 +294,8 @@ namespace Files.App.Views.Layouts
 			FileNameTeachingTip.IsOpen = false;
 			IsRenamingItem = false;
 
-			// Unsubscribe from events
-			if (textBox is not null)
-			{
-				textBox!.LostFocus -= RenameTextBox_LostFocus;
-				textBox.KeyDown -= RenameTextBox_KeyDown;
-			}
+			// Unsubscribe from events and reset rename state
+			ResetRenameState(textBox);
 
 			if (textBox is not null && textBox.Parent is not null)
 			{
