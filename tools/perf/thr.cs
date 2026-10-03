@@ -1,4 +1,4 @@
-using System; using System.Collections.Generic; using System.Diagnostics; using System.Runtime.InteropServices; using System.Text;
+using System; using System.Collections.Generic; using System.Diagnostics; using System.Runtime.InteropServices; using System.Text; using System.Threading;
 public static class Thr {
   [DllImport("kernel32.dll")] static extern IntPtr OpenThread(int acc, bool inh, int id);
   [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
@@ -7,7 +7,73 @@ public static class Thr {
   [DllImport("kernel32.dll")] static extern IntPtr LocalFree(IntPtr p);
   [DllImport("ntdll.dll")] static extern int NtQueryInformationThread(IntPtr h, int cls, out IntPtr info, int len, IntPtr ret);
   [DllImport("user32.dll")] static extern int GetWindowThreadProcessId(IntPtr h, out int pid);
-  public static int UiThread(IntPtr hwnd) { return GetWindowThreadProcessId(hwnd, out _); }
+  [DllImport("user32.dll", SetLastError = true)] static extern IntPtr OpenDesktop(string lpszDesktop, uint dwFlags, bool fInherit, uint dwDesiredAccess);
+  [DllImport("user32.dll", SetLastError = true)] static extern bool SetThreadDesktop(IntPtr hDesktop);
+  [DllImport("user32.dll", SetLastError = true)] static extern bool CloseDesktop(IntPtr hDesktop);
+  [DllImport("user32.dll")] static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumWindowsProc lpfn, IntPtr lParam);
+  delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
+  [DllImport("user32.dll")] static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+  public static IntPtr FindMainWindow(int pid) {
+    IntPtr result = IntPtr.Zero;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) {
+        SetThreadDesktop(hDesk);
+        EnumDesktopWindows(hDesk, (hwnd, lparam) => {
+          int p;
+          GetWindowThreadProcessId(hwnd, out p);
+          if (p == pid && IsWindowVisible(hwnd)) {
+            var sb = new StringBuilder(256);
+            GetWindowText(hwnd, sb, 256);
+            if (sb.Length > 0) {
+              result = hwnd;
+              return false;
+            }
+          }
+          return true;
+        }, IntPtr.Zero);
+        CloseDesktop(hDesk);
+      }
+    });
+    t.Start();
+    t.Join();
+    return result;
+  }
+
+  public static string WindowTitle(IntPtr hwnd) {
+    string title = "";
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) {
+        SetThreadDesktop(hDesk);
+        var sb = new StringBuilder(256);
+        GetWindowText(hwnd, sb, 256);
+        title = sb.ToString();
+        CloseDesktop(hDesk);
+      }
+    });
+    t.Start();
+    t.Join();
+    return title;
+  }
+
+  public static int UiThread(IntPtr hwnd) {
+    int tid = 0;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) {
+        SetThreadDesktop(hDesk);
+        tid = GetWindowThreadProcessId(hwnd, out _);
+        CloseDesktop(hDesk);
+      }
+    });
+    t.Start();
+    t.Join();
+    return tid != 0 ? tid : GetWindowThreadProcessId(hwnd, out _);
+  }
+
   public class Info { public int Id; public long Cpu100ns; public string Desc; public long Start; }
   public static Dictionary<int, Info> Snap(int pid) {
     var d = new Dictionary<int, Info>();

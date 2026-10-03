@@ -1,7 +1,8 @@
 param([string]$Folder = 'C:\FilesUXLab\perf\10k', [int]$WaitS = 8)
 $ErrorActionPreference = 'Stop'; Add-Type -Path (Join-Path $PSScriptRoot 'thr.cs')
-$p = Get-Process Files | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
-$ui = [Thr]::UiThread($p.MainWindowHandle)
+$p = Get-Process Files | Select-Object -First 1
+$hwnd = if ($p.MainWindowHandle -ne 0) { $p.MainWindowHandle } else { [Thr]::FindMainWindow($p.Id) }
+$ui = [Thr]::UiThread($hwnd)
 $a = [Thr]::Snap($p.Id); $c0 = $p.TotalProcessorTime
 Start-Process files-dev.exe -ArgumentList ('"' + $Folder + '"'); Start-Sleep $WaitS
 $b = [Thr]::Snap($p.Id); $p.Refresh(); $tot = ($p.TotalProcessorTime - $c0).TotalMilliseconds

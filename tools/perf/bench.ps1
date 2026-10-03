@@ -6,11 +6,12 @@ $apps = @(
   @{ Name='OneCommander'; Proc='OneCommander'; Exe='C:\Program Files\OneCommander\OneCommander.exe' })
 $folders = 'C:\FilesUXLab\perf\10k', 'C:\FilesUXLab\perf\img400'
 $res = foreach ($run in 0..$Runs) { foreach ($f in $folders) { foreach ($a in $apps) {
-  $p = Get-Process $a.Proc | Where-Object MainWindowHandle -ne 0 | Select-Object -First 1
+  $p = Get-Process $a.Proc | Select-Object -First 1
+  $hwnd = if ($p.MainWindowHandle -ne 0) { $p.MainWindowHandle } else { [VC]::FindMainWindow($p.Id) }
   $cpu0 = $p.TotalProcessorTime
   $sw = [Diagnostics.Stopwatch]::StartNew()
   Start-Process $a.Exe -ArgumentList ('"' + $f + '"')
-  $t = [VC]::Watch($p.MainWindowHandle, $sw, $TimeoutMs, $QuietMs)
+  $t = [VC]::Watch($hwnd, $sw, $TimeoutMs, $QuietMs)
   $p.Refresh()
   [pscustomobject]@{ Run=$run; App=$a.Name; Folder=(Split-Path $f -Leaf); FirstChangeMs=[int]$t[0]; VisuallyCompleteMs=[int]$t[1]; CpuMs=[int]($p.TotalProcessorTime-$cpu0).TotalMilliseconds; WS_MB=[int]($p.WorkingSet64/1MB) }
   Start-Sleep 2 } } }

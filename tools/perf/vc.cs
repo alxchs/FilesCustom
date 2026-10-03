@@ -1,5 +1,13 @@
-using System; using System.Diagnostics; using System.Runtime.InteropServices;
+using System; using System.Diagnostics; using System.Runtime.InteropServices; using System.Text; using System.Threading;
 public static class VC {
+  [DllImport("user32.dll", SetLastError = true)] static extern IntPtr OpenDesktop(string lpszDesktop, uint dwFlags, bool fInherit, uint dwDesiredAccess);
+  [DllImport("user32.dll", SetLastError = true)] static extern bool SetThreadDesktop(IntPtr hDesktop);
+  [DllImport("user32.dll", SetLastError = true)] static extern bool CloseDesktop(IntPtr hDesktop);
+  [DllImport("user32.dll")] static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumWindowsProc lpfn, IntPtr lParam);
+  delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
+  [DllImport("user32.dll")] static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+  [DllImport("user32.dll")] static extern int GetWindowThreadProcessId(IntPtr hWnd, out int pid);
   [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
   [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
   [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr h);
@@ -14,6 +22,38 @@ public static class VC {
   [DllImport("gdi32.dll")] static extern int GetDIBits(IntPtr dc, IntPtr bmp, uint start, uint lines, byte[] bits, ref BITMAPINFOHEADER bi, uint usage);
   public struct RECT { public int L,T,R,B; }
   [StructLayout(LayoutKind.Sequential)] public struct BITMAPINFOHEADER { public int biSize, biWidth, biHeight; public short biPlanes, biBitCount; public int biCompression, biSizeImage, biXPelsPerMeter, biYPelsPerMeter, biClrUsed, biClrImportant; }
+
+  public static IntPtr FindMainWindow(int pid) {
+    IntPtr result = IntPtr.Zero;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) {
+        SetThreadDesktop(hDesk);
+        EnumDesktopWindows(hDesk, (hwnd, lparam) => {
+          int p;
+          GetWindowThreadProcessId(hwnd, out p);
+          if (p == pid && IsWindowVisible(hwnd)) {
+            RECT r;
+            GetClientRect(hwnd, out r);
+            if (r.R - r.L > 400 && r.B - r.T > 300) {
+              var sb = new StringBuilder(256);
+              GetWindowText(hwnd, sb, 256);
+              if (sb.Length > 0) {
+                result = hwnd;
+                return false;
+              }
+            }
+          }
+          return true;
+        }, IntPtr.Zero);
+        CloseDesktop(hDesk);
+      }
+    });
+    t.Start();
+    t.Join();
+    return result;
+  }
+
   static byte[] Grab(IntPtr h, int w, int ht) {
     int sw = w / 6, sh = ht / 6;
     IntPtr screen = GetDC(IntPtr.Zero), big = CreateCompatibleDC(screen), small = CreateCompatibleDC(screen);
@@ -27,17 +67,55 @@ public static class VC {
     SelectObject(big, ob); DeleteObject(bigBmp); DeleteObject(smallBmp); DeleteDC(big); DeleteDC(small); ReleaseDC(IntPtr.Zero, screen);
     return buf; }
   static double Diff(byte[] a, byte[] b) { long s = 0; for (int i = 0; i < a.Length; i++) s += Math.Abs(a[i] - b[i]); return (double)s / a.Length; }
-  public static int[] Size(IntPtr h) { GetClientRect(h, out var r); return new[] { r.R - r.L, r.B - r.T }; }
+  public static int[] Size(IntPtr h) {
+    int[] s = null;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+      RECT r; GetClientRect(h, out r);
+      if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
+      s = new[] { r.R - r.L, r.B - r.T };
+    });
+    t.Start();
+    t.Join();
+    return s;
+  }
   // Returns [first change ms, last change ms] after the caller's stopwatch start.
   public static double[] Watch(IntPtr h, Stopwatch sw, int timeoutMs, int quietMs) {
-    GetClientRect(h, out var r); int w = r.R - r.L, ht = r.B - r.T;
-    var prev = Grab(h, w, ht); double last = 0, first = -1;
-    while (sw.ElapsedMilliseconds < timeoutMs) {
-      var cur = Grab(h, w, ht); double t = sw.Elapsed.TotalMilliseconds;
-      if (Diff(prev, cur) > 0.15) { last = t; if (first < 0) first = t; }
-      prev = cur;
-      if (last > 0 && t - last > quietMs) break;
-    }
-    return new[] { first, last }; }
-  public static double GrabCostMs(IntPtr h) { var s = Stopwatch.StartNew(); var z = Size(h); for (int i = 0; i < 10; i++) Grab(h, z[0], z[1]); return s.Elapsed.TotalMilliseconds / 10; }
+    double[] res = null;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+      RECT r; GetClientRect(h, out r); int w = r.R - r.L, ht = r.B - r.T;
+      var prev = Grab(h, w, ht); double last = 0, first = -1;
+      while (sw.ElapsedMilliseconds < timeoutMs) {
+        var cur = Grab(h, w, ht); double elapsed = sw.Elapsed.TotalMilliseconds;
+        if (Diff(prev, cur) > 0.15) { last = elapsed; if (first < 0) first = elapsed; }
+        prev = cur;
+        if (last > 0 && elapsed - last > quietMs) break;
+      }
+      if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
+      res = new[] { first, last };
+    });
+    t.SetApartmentState(ApartmentState.STA);
+    t.Start();
+    t.Join();
+    return res;
+  }
+  public static double GrabCostMs(IntPtr h) {
+    double cost = 0;
+    var t = new Thread(() => {
+      IntPtr hDesk = OpenDesktop("Default", 0, false, 0x01FF);
+      if (hDesk != IntPtr.Zero) SetThreadDesktop(hDesk);
+      RECT r; GetClientRect(h, out r); int w = r.R - r.L, ht = r.B - r.T;
+      var s = Stopwatch.StartNew();
+      for (int i = 0; i < 10; i++) Grab(h, w, ht);
+      cost = s.Elapsed.TotalMilliseconds / 10;
+      if (hDesk != IntPtr.Zero) CloseDesktop(hDesk);
+    });
+    t.SetApartmentState(ApartmentState.STA);
+    t.Start();
+    t.Join();
+    return cost;
+  }
 }
