@@ -7,6 +7,7 @@ public static class VC {
   delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
   [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
   [DllImport("user32.dll")] static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+  [DllImport("user32.dll")] static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
   [DllImport("user32.dll")] static extern int GetWindowThreadProcessId(IntPtr hWnd, out int pid);
   [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
   [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
@@ -33,15 +34,11 @@ public static class VC {
           int p;
           GetWindowThreadProcessId(hwnd, out p);
           if (p == pid && IsWindowVisible(hwnd)) {
-            RECT r;
-            GetClientRect(hwnd, out r);
-            if (r.R - r.L > 400 && r.B - r.T > 300) {
-              var sb = new StringBuilder(256);
-              GetWindowText(hwnd, sb, 256);
-              if (sb.Length > 0) {
-                result = hwnd;
-                return false;
-              }
+            var sbc = new StringBuilder(256);
+            GetClassName(hwnd, sbc, 256);
+            if (sbc.ToString() == "WinUIDesktopWin32WindowClass") {
+              result = hwnd;
+              return false;
             }
           }
           return true;
