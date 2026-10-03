@@ -5,14 +5,14 @@ Estado atual, curto. Atualize ao mudar de tarefa, ao parar e ao receber bloqueio
 ```text
 PROJECT        Files Custom (derivado do Files Community). Regras: MASTER_SPEC.md; continuidade: docs/agents/CONTINUITY.md
 OBJECTIVE      File manager moderno com UX mais previsível (rename, colunas, abas, menu, preview/details, busca). Ver MASTER_SPEC.md §2 e §44
-CURRENT PHASE  G0 — Baseline & Zero-Warning Gate
-CURRENT TASK   G0: smoke test do §16 (Open-FilesDev.ps1) e F007-A: A/B do backdrop (docs/agents/tasks/F007-perf-ab-backdrop.md)
-ACCEPTANCE     Build x64 Release com 0 erros/0 warnings (feito); app abre (CONFIRMED 01/10); smoke §16 registrado em STATUS.md
-DO NOT CHANGE  Nenhum código de produto em src/ e tests/ além do necessário para compilar e limpar warnings. Não editar OneCommander (só observar pela UI, §3.1)
+CURRENT PHASE  G1 — Pipeline & Primeira Feature (F001 Rename UX)
+CURRENT TASK   OC-rename (docs/agents/tasks/OC-rename-exploration.md) e F001 Rename UX (docs/agents/tasks/F001-rename-ux.md)
+ACCEPTANCE     G0 fechado (CONFIRMED 03/10: build 0/0, app abre, smoke test §16 itens 1 a 9 validados e registrados em STATUS.md); F007-A concluído
+DO NOT CHANGE  Nenhum código de produto em src/ e tests/ fora do escopo aprovado. Não editar OneCommander (só observar pela UI, §3.1)
 OWNER          AGY (fila do PLAYBOOK); Claude em pausa a pedido do Alexandre (03/10/2026)
 CURRENT BRANCH main (base: upstream/main 0e3c17ca4, D-008)
 LAST DECISION  D-001..D-008 em DECISIONS.md (D-008, 03/10/2026: base migrada para upstream/main)
-NEXT ACTION    Seguir a fila de docs/agents/PLAYBOOK.md: 1) F007-A  2) G0 smoke  3) OC-rename  4) F001 (pré-aprovado)  5) explorações F003/F005/F002/F004/F006
-BLOCKER        AGY sem cota (429, grupo Gemini renova ~04:31 de 03/10; grupo Claude ~68h). Ver handoff 2026-10-03_0220. Troca de conta via trocarConta NAO alterou a cota do agy --print (evidencia no handoff)
-LAST UPDATE    2026-10-03 02:20 — Claude (AGY parada por cota; handoff escrito; G0 segue aberto)
+NEXT ACTION    Seguir a fila de docs/agents/PLAYBOOK.md: 3) OC-rename  4) F001 (pré-aprovado)  5) explorações F003/F005/F002/F004/F006
+BLOCKER        nenhum
+LAST UPDATE    2026-10-03 12:15 — AGY (G0 fechado, smoke test §16 validado com capturas, A/B revisado)
 ```

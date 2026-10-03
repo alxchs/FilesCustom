@@ -57,7 +57,7 @@ pwsh tools\perf\bench.ps1 -Runs 3                  # Files × OneCommander
 - Depois de merge ou troca de pacote, rode `dotnet restore` em **cada** projeto (assets velhos geram `MSB3277` falso no Server).
 - Roslyn (`Microsoft.CodeAnalysis.CSharp/Analyzers`) está fixado em **5.6.0**: o compilador do SDK 10.0.301 é 5.6.0 e o 5.9.0 do upstream dá `CS9057`. Se o SDK for atualizado, reavalie e registre.
 - `Files.exe` solto morre com `REGDB_E_CLASSNOTREG`: o app é MSIX; só abre por `Open-FilesDev.ps1`.
-- Python não existe nesta máquina; heredoc grande no Bash pode quebrar; use PowerShell ou a ferramenta de edição.
+- O `python` do Bash é o atalho da Store e não roda; o Python 3.11 real está em `C:\Users\alxch\AppData\Local\Programs\Python\Python311` e funciona no PowerShell. Heredoc grande no Bash pode quebrar; use PowerShell ou a ferramenta de edição.
 - Não mate `agy.exe --hub` de outra janela. Cota/troca de conta: regras globais (`~/.gemini/GEMINI.md`).
 - OneCommander: só comportamento externo (§3.1). Nada de descompilar, inspecionar memória ou copiar código.
 - O Files Dev tem abas e sessão do Alexandre: ao reabrir para testar, não feche trabalho dele sem motivo.

@@ -69,7 +69,12 @@ public static class DesktopLauncher {
 }
 
 public static class WindowCapturer {
+    [DllImport("user32.dll", SetLastError = true)] public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiContext);
     [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdcBlt, uint nFlags);
+    [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
+    public struct RECT { public int L, T, R, B; }
 }
 "@
 
@@ -102,9 +107,9 @@ $PowerShellScript
 
 function Send-KeyToFiles {
     param(
-        [Parameter(Mandatory=$true)][ushort]$Key,
-        [ushort]$Mod1 = 0,
-        [ushort]$Mod2 = 0,
+        [Parameter(Mandatory=$true)][uint16]$Key,
+        [uint16]$Mod1 = 0,
+        [uint16]$Mod2 = 0,
         [int]$WaitAfterMs = 500
     )
     $script = @"
@@ -219,8 +224,15 @@ function Capture-FilesWindow {
     if (-not $p) { throw "Process Files not found" }
     $hwnd = [VC]::FindMainWindow($p.Id)
     if ($hwnd -eq [IntPtr]::Zero) { throw "Files MainWindow not found" }
-    $size = [VC]::Size($hwnd)
-    $w = $size[0]; $h = $size[1]
+    [WindowCapturer]::SetProcessDpiAwarenessContext([IntPtr](-4))
+    if ([WindowCapturer]::IsIconic($hwnd)) {
+        [WindowCapturer]::ShowWindow($hwnd, 9)
+        Start-Sleep -Milliseconds 200
+    }
+    $r = New-Object WindowCapturer+RECT
+    [WindowCapturer]::GetClientRect($hwnd, [ref]$r)
+    $w = $r.R - $r.L
+    $h = $r.B - $r.T
     if ($w -le 0 -or $h -le 0) { throw "Invalid window size: $w x $h" }
 
     $bmp = New-Object System.Drawing.Bitmap $w, $h
