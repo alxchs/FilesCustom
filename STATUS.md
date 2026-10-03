@@ -2,6 +2,11 @@
 
 Última atualização: 2026-10-01 (Claude). Estados de evidência: NOT TESTED / OBSERVED / INFERRED / CONFIRMED (MASTER_SPEC §27).
 
+## Publicação (02/10/2026)
+
+- CONFIRMED: `git push origin main:refs/heads/custom/main` publicou os commits do Files Custom em `https://github.com/alxchs/FilesCustom` (branch `custom/main`). O `main` do fork foi sincronizado com o upstream (127 commits à frente de v4.2.9), então o push direto de `main` foi rejeitado (non-fast-forward). Nada foi forçado. Comando: `git rev-list --left-right --count HEAD...origin/main` = `7 127`.
+- Decisão pendente do Alexandre: quando migrar a base do v4.2.9 para o upstream atual (merge/rebase em `custom/main`). Até lá, baseline e medições valem para o v4.2.9.
+
 ## Gates
 
 | Gate | Descrição | Estado |
