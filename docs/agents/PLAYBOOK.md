@@ -11,7 +11,7 @@ Escrito pelo Claude em 03/10/2026. Metodologia geral: `C:\Users\alxch\.dev-metho
 
 ## Fila (em ordem; marque cada item no `STATUS.md` ao concluir)
 
-1. **F007-A** — `docs/agents/tasks/F007-perf-ab-backdrop.md`. Medir (sem código) o A/B do fundo e refazer a linha de base de CPU nesta base.
+1. **F007-A** (feito pela AGY, revisado pelo Claude em 03/10) e **F007-B** — `docs/agents/tasks/F007-B-compositor-idle.md`: bisseccionar o que mantém o compositor acordado (fundo Solid como base).
 2. **G0 smoke** — `docs/agents/tasks/G0-smoke-test-base-upstream.md`. Fecha o gate G0.
 3. **OC-rename** — `docs/agents/tasks/OC-rename-exploration.md`. Observar o OneCommander e escrever `docs/ux-reference/onecommander/rename.md`.
 4. **F001 Rename UX** — `docs/agents/tasks/F001-rename-ux.md` (ver "Pré-aprovado").
