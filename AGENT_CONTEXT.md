@@ -13,6 +13,6 @@ OWNER          AGY (fila do PLAYBOOK); Claude em pausa a pedido do Alexandre (03
 CURRENT BRANCH main (base: upstream/main 0e3c17ca4, D-008)
 LAST DECISION  D-001..D-008 em DECISIONS.md (D-008, 03/10/2026: base migrada para upstream/main)
 NEXT ACTION    Seguir a fila de docs/agents/PLAYBOOK.md: 1) F007-A  2) G0 smoke  3) OC-rename  4) F001 (pré-aprovado)  5) explorações F003/F005/F002/F004/F006
-BLOCKER        Nenhum
-LAST UPDATE    2026-10-03 — Claude (PLAYBOOK + METODO comum em ~/.dev-method; briefs F007-A, G0, OC-rename, F001)
+BLOCKER        AGY sem cota (429, grupo Gemini renova ~04:31 de 03/10; grupo Claude ~68h). Ver handoff 2026-10-03_0220. Troca de conta via trocarConta NAO alterou a cota do agy --print (evidencia no handoff)
+LAST UPDATE    2026-10-03 02:20 — Claude (AGY parada por cota; handoff escrito; G0 segue aberto)
 ```
