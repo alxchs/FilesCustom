@@ -16,7 +16,7 @@ Escrito pelo Claude em 03/10/2026. Metodologia geral: `C:\Users\alxch\.dev-metho
 3. **OC-rename** — `docs/agents/tasks/OC-rename-exploration.md`. Observar o OneCommander e escrever `docs/ux-reference/onecommander/rename.md`.
 4. **F001 Rename UX** — `docs/agents/tasks/F001-rename-ux.md` (ver "Pré-aprovado").
 5. **Explorações do OneCommander + análise do Files (§40, §41), uma feature por vez, nesta ordem:** F003 abas, F005 preview/details, F002 colunas, F004 menus, F006 busca. Saída: `docs/ux-reference/onecommander/<feature>.md` (modelo do §18) e um brief em rascunho em `docs/agents/tasks/`.
-6. **Implementar F003 e F005** (pré-aprovado abaixo). F002, F004 e F006 ficam em brief/análise até o Claude aprovar.
+6. **F003 (confirmar), F005 (implementar)**; F002 (investigação por teste), F004 (análise + protótipo) e F006 fase 1 (benchmark) têm brief em rascunho em `docs/agents/tasks/` e param no gate do Claude antes de codar.
 
 Se a fila acabar: `DISCOVERY` em `STATUS.md`, handoff, `AGENT_CONTEXT.md` atualizado e pare.
 
