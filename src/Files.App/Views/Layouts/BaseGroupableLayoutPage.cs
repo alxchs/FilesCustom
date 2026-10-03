@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using System.Runtime.InteropServices;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.Win32;
@@ -33,7 +34,7 @@ namespace Files.App.Views.Layouts
 
 		// Properties
 
-		protected FileNameParts ActiveRenameParts { get; set; }
+		protected FileNameParts ActiveRenameParts { get; set; } = new FileNameParts(string.Empty, string.Empty, string.Empty);
 		protected bool IsExtensionUnlocked { get; set; }
 		protected bool IsExtensionDeliberatelyModified { get; set; }
 
@@ -350,6 +351,7 @@ namespace Files.App.Views.Layouts
 			textBox.SelectionChanged += RenameTextBox_SelectionChanged;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		protected virtual void RenameTextBox_SelectionChanged(object sender, RoutedEventArgs e)
 		{
 			if (sender is not TextBox textBox || !IsRenamingItem)
@@ -383,7 +385,7 @@ namespace Files.App.Views.Layouts
 
 			IsExtensionUnlocked = false;
 			IsExtensionDeliberatelyModified = false;
-			ActiveRenameParts = default;
+			ActiveRenameParts = new FileNameParts(string.Empty, string.Empty, string.Empty);
 		}
 
 		protected override async Task ValidateItemNameInputTextAsync(TextBox textBox, TextBoxBeforeTextChangingEventArgs args, Action<bool> showError)

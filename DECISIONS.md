@@ -62,3 +62,13 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 - **Trade-offs:** o spec original (D-001) era "verbatim"; esta seção é a primeira alteração, registrada aqui. Colunas dinâmicas (F010) e busca externa (F011) aumentam o diff contra o upstream; mitigação: arquivos próprios e fases com gate do Claude.
 - **Consequences:** a lista no §29 está superada pelo §46. Nenhuma configuração muda o comportamento padrão.
 - **Fatos verificados em 03/10/2026:** F3 e Ctrl+F já estão em `SearchAction`; linha mínima do Details é 28 px; fonte global única `AppThemeFontFamily`; Everything 1.4.1.1032 e Agent Ransack 9.2.3425.1 (com `flpsearch.exe`) instalados. O que é INFERRED/NOT TESTED está marcado nos briefs.
+
+
+## D-010 — Claude corrigiu 3 erros de compilacao do wip da F001 (03/10/2026)
+
+- **Context:** o wip da AGY (`774f5eb64`) nunca tinha sido compilado e `mkfile release` falhou com 3 erros em `BaseGroupableLayoutPage.cs`. O disparo da AGY foi bloqueado pelo classificador do Claude Code mesmo com a permissao do Alexandre no chat, e ele nao soube criar a regra de permissao. O Alexandre queria um exe testavel.
+- **Options:** (1) esperar a AGY; (2) Claude corrige so os erros de compilacao; (3) reabrir o exe antigo.
+- **Decision:** opcao 2, autorizada explicitamente pelo Alexandre em 03/10/2026 ("Tem minha autorizacao"). Escopo: `using Windows.Storage;`, inicializar `ActiveRenameParts` com `FileNameParts` vazio (no campo e em `ResetRenameState`) e `[DynamicWindowsRuntimeCast(typeof(TextBox))]` em `RenameTextBox_SelectionChanged` (warning CsWinRT1034). Nada mais.
+- **Reason:** a falha da AGY nao foi cota nem 5 tentativas; foi bloqueio de disparo. Excecao pontual e autorizada a regra "a AGY faz, o Claude nunca termina por ela".
+- **Trade-offs:** os achados MAJOR de comportamento (tecla End destrava a extensao; `showExtensionDialog` suprimido em arquivo sem extensao) **continuam abertos** na AGY, em `docs/agents/reviews/2026-10-03_Claude_revisao-F001-wip.md`.
+- **Consequences:** `mkfile release src\Files.App\Files.App.csproj` = 0 Warning(s), 0 Error(s) (03/10/2026 18:29). App aberto por `Open-FilesDev.ps1`.
