@@ -5,7 +5,9 @@
 ## Publicação (02/10/2026)
 
 - CONFIRMED: `git push origin main:refs/heads/custom/main` publicou os commits do Files Custom em `https://github.com/alxchs/FilesCustom` (branch `custom/main`). O `main` do fork foi sincronizado com o upstream (127 commits à frente de v4.2.9), então o push direto de `main` foi rejeitado (non-fast-forward). Nada foi forçado. Comando: `git rev-list --left-right --count HEAD...origin/main` = `7 127`.
-- Decisão pendente do Alexandre: quando migrar a base do v4.2.9 para o upstream atual (merge/rebase em `custom/main`). Até lá, baseline e medições valem para o v4.2.9.
+- CONFIRMED (03/10/2026, D-008): base migrada para `upstream/main` (`0e3c17ca4`, 24/09/2026) por merge, com a tag `safety/pre-upstream-merge-v4.2.9` antes. Build: `mkfile release src\Files.App\Files.App.csproj` = `0 Warning(s)`, `0 Error(s)`. App aberto por `Open-FilesDev.ps1` (pacote 4.2.37.0): janela com abas restauradas, Omnibar e listagem de pastas, capturada por `PrintWindow`.
+- NOT TESTED nesta base: smoke test completo do §16, medições de `tools/perf/` e o A/B do backdrop (F007-A). As medições anteriores valem para v4.2.9 e devem ser refeitas.
+- Pendente: o merge ainda não foi enviado (push) para `custom/main`.
 
 ## Gates
 
