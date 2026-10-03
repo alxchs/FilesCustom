@@ -3668,35 +3668,119 @@
   </data>
   <data name="StatusCenter_GitCloneCanceled_Header" xml:space="preserve">
     <value>Prekinuto kloniranje {0} u "{1}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the repository and {1} is the destination folder.</comment>
   </data>
   <data name="StatusCenter_GitCloneCanceled_SubHeader" xml:space="preserve">
     <value>Prekinuto kloniranje {0} s "{1}" u "{2}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the Git object count, {1} is the repository, and {2} is the destination path.</comment>
   </data>
   <data name="StatusCenter_GitCloneComplete_Header" xml:space="preserve">
     <value>Klonirano "{0}" u "{1}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the repository and {1} is the destination folder.</comment>
   </data>
   <data name="StatusCenter_GitCloneComplete_SubHeader" xml:space="preserve">
     <value>Klonirano {0} iz "{1}" u "{2}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the Git object count, {1} is the repository, and {2} is the destination path.</comment>
   </data>
   <data name="StatusCenter_GitCloneFailed_Header" xml:space="preserve">
     <value>Greška pri kloniranju "{0}" u "{1}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the repository and {1} is the destination folder.</comment>
   </data>
   <data name="StatusCenter_GitCloneFailed_SubHeader" xml:space="preserve">
     <value>Neuspješno kloniranje {0} iz "{1}" u "{2}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the Git object count, {1} is the repository, and {2} is the destination path.</comment>
   </data>
   <data name="StatusCenter_GitCloneInProgress_Header" xml:space="preserve">
     <value>Kloniranje "{0}" u "{1}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the repository and {1} is the destination folder.</comment>
   </data>
   <data name="StatusCenter_GitCloneInProgress_SubHeader" xml:space="preserve">
     <value>Kloniranje {0} iz "{1}" u "{2}"</value>
-    <comment>Shown in a StatusCenter card.</comment>
+    <comment>Shown in Status Center for Git clone. {0} is the Git object count, {1} is the repository, and {2} is the destination path.</comment>
+  </data>
+  <data name="StatusCenter_GitCheckoutCanceled_Header" xml:space="preserve">
+    <value>Otkazano prebacivanje na "{0}" u repozitoriju "{1}"</value>
+    <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitCheckoutComplete_Header" xml:space="preserve">
+    <value>Prebačeno na "{0}" u repozitoriju "{1}"</value>
+    <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitCheckoutFailed_Header" xml:space="preserve">
+    <value>Prebacivanje na "{0}" u repozitoriju "{1}" nije uspjelo</value>
+    <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitCheckoutInProgress_Header" xml:space="preserve">
+    <value>Prebacivanje na "{0}" u repozitoriju "{1}"</value>
+    <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitFetchCanceled_Header" xml:space="preserve">
+    <value>Otkazano dohvaćanje udaljenih promjena za "{0}"</value>
+    <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitFetchComplete_Header" xml:space="preserve">
+    <value>Dohvaćene udaljene promjene za "{0}"</value>
+    <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitFetchFailed_Header" xml:space="preserve">
+    <value>Dohvaćanje udaljenih promjena za "{0}" nije uspjelo</value>
+    <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitFetchInProgress_Header" xml:space="preserve">
+    <value>Dohvaćanje udaljenih promjena za "{0}"</value>
+    <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitOperationProgress" xml:space="preserve">
+    <value>Dovršeno {0}%</value>
+    <comment>Shown in Status Center during a Git operation. {0} is the percentage from 0 to 100.</comment>
+  </data>
+  <data name="StatusCenter_GitPullCanceled_Header" xml:space="preserve">
+    <value>Otkazano povlačenje udaljenih promjena u "{0}"</value>
+    <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPullComplete_Header" xml:space="preserve">
+    <value>Povučene udaljene promjene u "{0}"</value>
+    <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPullFailed_Header" xml:space="preserve">
+    <value>Povlačenje udaljenih promjena u "{0}" nije uspjelo</value>
+    <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPullInProgress_Header" xml:space="preserve">
+    <value>Povlačenje udaljenih promjena u "{0}"</value>
+    <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPushCanceled_Header" xml:space="preserve">
+    <value>Otkazano slanje lokalnih commitova iz "{0}"</value>
+    <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPushComplete_Header" xml:space="preserve">
+    <value>Poslani lokalni commitovi iz "{0}"</value>
+    <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPushFailed_Header" xml:space="preserve">
+    <value>Slanje lokalnih commitova iz "{0}" nije uspjelo</value>
+    <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitPushInProgress_Header" xml:space="preserve">
+    <value>Slanje lokalnih commitova iz "{0}"</value>
+    <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitSyncCanceled_Header" xml:space="preserve">
+    <value>Otkazana sinkronizacija lokalnih i udaljenih commitova za "{0}"</value>
+    <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitSyncComplete_Header" xml:space="preserve">
+    <value>Sinkronizirani lokalni i udaljeni commitovi za "{0}"</value>
+    <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitSyncFailed_Header" xml:space="preserve">
+    <value>Sinkronizacija lokalnih i udaljenih commitova za "{0}" nije uspjela</value>
+    <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
+  </data>
+  <data name="StatusCenter_GitSyncInProgress_Header" xml:space="preserve">
+    <value>Sinkronizacija lokalnih i udaljenih commitova za "{0}"</value>
+    <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_InstallFontCanceled_Header" xml:space="preserve">
     <value>Prekid instalacije {0} fontova</value>
@@ -4074,6 +4158,12 @@
   <data name="KeybindingInvalidKeyNotification" xml:space="preserve">
     <value>Tipkovnički prečac koji ste odabrali ne može se koristiti, pokušajte ponovno s drugim tipkovničkim prečacem.</value>
   </data>
+  <data name="KeyboardShortcuts" xml:space="preserve">
+    <value>Tipkovnički prečaci</value>
+  </data>
+  <data name="DeleteKeyBindingConfirmation" xml:space="preserve">
+    <value>Jeste li sigurni da želite ukloniti ovaj tipkovnički prečac?</value>
+  </data>
   <data name="Customized" xml:space="preserve">
     <value>Prilagođeno</value>
   </data>
@@ -4170,13 +4260,13 @@
     <comment>This is the friendly name for image files.</comment>
   </data>
   <data name="AllSupportedFiles" xml:space="preserve">
-    <value>All supported files</value>
+    <value>Sve podržane datoteke</value>
   </data>
   <data name="ConvertToIconRequiredMessage" xml:space="preserve">
-    <value>This image needs to be converted into an icon file before it can be used. Choose a location to save the converted icon file.</value>
+    <value>Ovu je sliku potrebno pretvoriti u datoteku ikone prije nego što se može koristiti. Odaberite mjesto za spremanje pretvorene datoteke ikone.</value>
   </data>
   <data name="ConvertToIconError" xml:space="preserve">
-    <value>Couldn't convert the image to an icon file</value>
+    <value>Slika se nije mogla pretvoriti u datoteku ikone</value>
   </data>
   <data name="NumPadTypeName" xml:space="preserve">
     <value>Num</value>

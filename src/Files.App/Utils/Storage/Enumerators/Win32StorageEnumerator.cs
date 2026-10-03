@@ -20,17 +20,17 @@ namespace Files.App.Utils.Storage
 
 		public static async Task<List<ListedItem>> ListEntries(
 			string path,
-			IntPtr hFile,
+			Win32PInvoke.SafeFindHandle hFile,
 			Win32PInvoke.WIN32_FIND_DATA findData,
 			CancellationToken cancellationToken,
 			int countLimit,
+			uint iconSize,
 			Func<List<ListedItem>, Task> intermediateAction
 		)
 		{
 			var sampler = new IntervalSampler(500);
-			// The first flush is time-based only: folders that enumerate faster than the
-			// interval get a single sorted apply, slow folders show content early.
-			var firstBatchSampler = new IntervalSampler(50);
+			// Intermediate flushes merge in sorted, so an early first paint costs no reshuffle later
+			var firstBatchSampler = new IntervalSampler(25);
 			var hasFlushedFirstBatch = false;
 			var tempList = new List<ListedItem>();
 			var count = 0;
@@ -43,80 +43,84 @@ namespace Files.App.Utils.Storage
 			bool areAlternateStreamsVisible = userSettingsService.FoldersSettingsService.AreAlternateStreamsVisible;
 
 			var isGitRepo = GitHelpers.IsRepositoryEx(path, out var repoPath) && !string.IsNullOrEmpty(await GitHelpers.GetRepositoryHeadName(repoPath));
+			var rawHandle = hFile.DangerousGetHandle();
 
-			do
+			try
 			{
-				var isSystem = ((FileAttributes)findData.dwFileAttributes & FileAttributes.System) == FileAttributes.System;
-				var isHidden = ((FileAttributes)findData.dwFileAttributes & FileAttributes.Hidden) == FileAttributes.Hidden;
-				var startWithDot = findData.cFileName.StartsWith('.');
-				if ((!isHidden ||
-					(showHiddenItems &&
-					(!isSystem || showProtectedSystemFiles))) &&
-					(!startWithDot || showDotFiles))
+				do
 				{
-					if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) != FileAttributes.Directory)
+					var isSystem = ((FileAttributes)findData.dwFileAttributes & FileAttributes.System) == FileAttributes.System;
+					var isHidden = ((FileAttributes)findData.dwFileAttributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+					var startWithDot = findData.cFileName.StartsWith('.');
+					if ((!isHidden ||
+						(showHiddenItems &&
+							(!isSystem || showProtectedSystemFiles))) &&
+						(!startWithDot || showDotFiles))
 					{
-						var file = await GetFile(findData, path, isGitRepo, cancellationToken);
-						if (file is not null)
+						if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) != FileAttributes.Directory)
 						{
-							var filePath = file.ItemPath!;
-							file.PreloadedIconData = await iconCacheService.GetIconAsync(file.ItemPath, file.FileExtension, false);
-							tempList.Add(file);
-							++count;
-
-							if (areAlternateStreamsVisible)
+							var file = await GetFile(findData, path, isGitRepo, cancellationToken);
+							if (file is not null)
 							{
-								tempList.AddRange(EnumAdsForPath(filePath, file));
-							}
-						}
-					}
-					else if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
-					{
-						if (findData.cFileName != "." && findData.cFileName != "..")
-						{
-							var folder = await GetFolder(findData, path, isGitRepo, cancellationToken);
-							if (folder is not null)
-							{
-								var folderPath = folder.ItemPath!;
-								folder.PreloadedIconData = await iconCacheService.GetIconAsync(folder.ItemPath, null, true);
-								tempList.Add(folder);
+								var filePath = file.ItemPath!;
+								file.PreloadedIconData = await iconCacheService.GetIconAsync(file.ItemPath, file.FileExtension, false, iconSize);
+								tempList.Add(file);
 								++count;
 
 								if (areAlternateStreamsVisible)
-									tempList.AddRange(EnumAdsForPath(folderPath, folder));
-
-								if (CalculateFolderSizes)
+									tempList.AddRange(EnumAdsForPath(filePath, file));
+							}
+						}
+						else if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) == FileAttributes.Directory)
+						{
+							if (findData.cFileName != "." && findData.cFileName != "..")
+							{
+								var folder = await GetFolder(findData, path, isGitRepo, cancellationToken);
+								if (folder is not null)
 								{
-									if (folderSizeProvider.TryGetSize(folderPath, out var size))
-									{
-										folder.FileSizeBytes = (long)size;
-										folder.FileSize = size.ToSizeString();
-									}
+									var folderPath = folder.ItemPath!;
+									folder.PreloadedIconData = await iconCacheService.GetIconAsync(folder.ItemPath, null, true, iconSize);
+									tempList.Add(folder);
+									++count;
 
-									_ = folderSizeProvider.UpdateAsync(folderPath, cancellationToken);
+									if (areAlternateStreamsVisible)
+										tempList.AddRange(EnumAdsForPath(folderPath, folder));
+
+									if (CalculateFolderSizes)
+									{
+										if (folderSizeProvider.TryGetSize(folderPath, out var size))
+										{
+											folder.FileSizeBytes = (long)size;
+											folder.FileSize = size.ToSizeString();
+										}
+
+										_ = folderSizeProvider.UpdateAsync(folderPath, cancellationToken);
+									}
 								}
 							}
 						}
 					}
-				}
 
-				if (cancellationToken.IsCancellationRequested || count == countLimit)
-					break;
+					if (cancellationToken.IsCancellationRequested || count == countLimit)
+						break;
 
-				if (intermediateAction is not null &&
-					(hasFlushedFirstBatch
-						? sampler.CheckNow()
-						: tempList.Count > 0 && firstBatchSampler.CheckNow()))
-				{
-					hasFlushedFirstBatch = true;
-					await intermediateAction(tempList);
+					if (intermediateAction is not null &&
+						(hasFlushedFirstBatch
+							? sampler.CheckNow()
+							: tempList.Count > 0 && firstBatchSampler.CheckNow()))
+					{
+						hasFlushedFirstBatch = true;
+						await intermediateAction(tempList);
 
-					// clear the temporary list every time we do an intermediate action
-					tempList.Clear();
-				}
-			} while (Win32PInvoke.FindNextFile(hFile, out findData));
-
-			Win32PInvoke.FindClose(hFile);
+						// clear the temporary list every time we do an intermediate action
+						tempList.Clear();
+					}
+				} while (Win32PInvoke.FindNextFile(rawHandle, out findData));
+			}
+			finally
+			{
+				hFile.Dispose();
+			}
 
 			return tempList;
 		}
@@ -174,10 +178,10 @@ namespace Files.App.Utils.Storage
 
 			try
 			{
-				Win32PInvoke.FileTimeToSystemTime(ref findData.ftLastWriteTime, out Win32PInvoke.SYSTEMTIME systemModifiedTimeOutput);
+				Win32PInvoke.FileTimeToSystemTime(in findData.ftLastWriteTime, out Win32PInvoke.SYSTEMTIME systemModifiedTimeOutput);
 				itemModifiedDate = systemModifiedTimeOutput.ToDateTime();
 
-				Win32PInvoke.FileTimeToSystemTime(ref findData.ftCreationTime, out Win32PInvoke.SYSTEMTIME systemCreatedTimeOutput);
+				Win32PInvoke.FileTimeToSystemTime(in findData.ftCreationTime, out Win32PInvoke.SYSTEMTIME systemCreatedTimeOutput);
 				itemCreatedDate = systemCreatedTimeOutput.ToDateTime();
 			}
 			catch (ArgumentException)
@@ -190,7 +194,15 @@ namespace Files.App.Utils.Storage
 
 			string itemName = await fileListCache.GetDisplayName(itemPath, cancellationToken);
 			if (string.IsNullOrEmpty(itemName))
+			{
 				itemName = findData.cFileName;
+
+				// The shell only reads desktop.ini for folders marked ReadOnly or System, and keeps the raw name for junctions
+				const FileAttributes desktopIniFlags = FileAttributes.ReadOnly | FileAttributes.System;
+				var attributes = (FileAttributes)findData.dwFileAttributes;
+				if ((attributes & desktopIniFlags) != 0 && (attributes & FileAttributes.ReparsePoint) == 0)
+					itemName = Win32Helper.GetLocalizedName(itemPath) ?? itemName;
+			}
 
 			bool isHidden = (((FileAttributes)findData.dwFileAttributes & FileAttributes.Hidden) == FileAttributes.Hidden);
 			double opacity = 1;
@@ -250,13 +262,13 @@ namespace Files.App.Utils.Storage
 
 			try
 			{
-				Win32PInvoke.FileTimeToSystemTime(ref findData.ftLastWriteTime, out Win32PInvoke.SYSTEMTIME systemModifiedDateOutput);
+				Win32PInvoke.FileTimeToSystemTime(in findData.ftLastWriteTime, out Win32PInvoke.SYSTEMTIME systemModifiedDateOutput);
 				itemModifiedDate = systemModifiedDateOutput.ToDateTime();
 
-				Win32PInvoke.FileTimeToSystemTime(ref findData.ftCreationTime, out Win32PInvoke.SYSTEMTIME systemCreatedDateOutput);
+				Win32PInvoke.FileTimeToSystemTime(in findData.ftCreationTime, out Win32PInvoke.SYSTEMTIME systemCreatedDateOutput);
 				itemCreatedDate = systemCreatedDateOutput.ToDateTime();
 
-				Win32PInvoke.FileTimeToSystemTime(ref findData.ftLastAccessTime, out Win32PInvoke.SYSTEMTIME systemLastAccessOutput);
+				Win32PInvoke.FileTimeToSystemTime(in findData.ftLastAccessTime, out Win32PInvoke.SYSTEMTIME systemLastAccessOutput);
 				itemLastAccessDate = systemLastAccessOutput.ToDateTime();
 			}
 			catch (ArgumentException)
@@ -273,7 +285,12 @@ namespace Files.App.Utils.Storage
 			if (findData.cFileName.Contains('.'))
 			{
 				itemFileExtension = Path.GetExtension(itemPath);
-				itemType = itemFileExtension!.Trim('.') + " " + itemType;
+
+				// Resolve the localized type here (cached by extension) so it's correct from the first paint and sorts right
+				var localizedType = FileTypesHelper.GetLocalizedTypeName(itemFileExtension);
+				itemType = !string.IsNullOrEmpty(localizedType)
+					? localizedType
+					: itemFileExtension!.Trim('.') + " " + itemType;
 			}
 
 			bool itemThumbnailImgVis = false;

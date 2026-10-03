@@ -12,6 +12,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.ApplicationModel.DataTransfer.DragDrop;
 using Windows.Storage;
 using Windows.System;
+using WinRT;
 
 namespace Files.App.ViewModels.Layouts
 {
@@ -54,6 +55,7 @@ namespace Files.App.ViewModels.Layouts
 			_ = UIFilesystemHelpers.CreateFileFromDialogResultTypeAsync(AddItemDialogItemType.File, f, _associatedInstance);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		private async Task ItemPointerPressedAsync(PointerRoutedEventArgs? e)
 		{
 			if (e is null)
@@ -132,7 +134,7 @@ namespace Files.App.ViewModels.Layouts
 				var workingDirectory = workingDirectoryPath.TrimPath()!;
 				var folderName = Path.IsPathRooted(workingDirectory) && Path.GetPathRoot(workingDirectory) == workingDirectory ? Path.GetPathRoot(workingDirectory) : Path.GetFileName(workingDirectory);
 
-				if (e.DataView.Contains(StandardDataFormats.Uri) && await e.DataView.GetUriAsync() is { } uri)
+				if (e.DataView.Contains(StandardDataFormats.Uri) && await TryGetUriAsync(e.DataView) is { } uri)
 				{
 					if (GitHelpers.IsValidRepoUrl(uri.ToString()))
 					{
@@ -146,8 +148,9 @@ namespace Files.App.ViewModels.Layouts
 
 				var draggedItems = await FilesystemHelpers.GetDraggedStorageItems(e.DataView);
 
-				// As long as one file doesn't already belong to this folder
-				if (_associatedInstance.InstanceViewModel.IsPageTypeSearchResults || draggedItems.Any() && draggedItems.AreItemsAlreadyInFolder(workingDirectoryPath))
+				// As long as one file doesn't already belong to this folder, and this folder isn't one of the dragged items or inside one
+				if (_associatedInstance.InstanceViewModel.IsPageTypeSearchResults ||
+					draggedItems.Any() && (draggedItems.AreItemsAlreadyInFolder(workingDirectoryPath) || draggedItems.ContainsDestinationOrAncestor(workingDirectoryPath)))
 				{
 					e.AcceptedOperation = DataPackageOperation.None;
 				}
@@ -219,6 +222,7 @@ namespace Files.App.ViewModels.Layouts
 			deferral.Complete();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
 		public async Task DropAsync(DragEventArgs? e)
 		{
 			if (e is null)
@@ -231,7 +235,7 @@ namespace Files.App.ViewModels.Layouts
 			}
 
 			e.Handled = true;
-			if (e.DataView.Contains(StandardDataFormats.Uri) && await e.DataView.GetUriAsync() is { } uri)
+			if (e.DataView.Contains(StandardDataFormats.Uri) && await TryGetUriAsync(e.DataView) is { } uri)
 			{
 				if (GitHelpers.IsValidRepoUrl(uri.ToString()))
 				{
@@ -286,6 +290,19 @@ namespace Files.App.ViewModels.Layouts
 			finally
 			{
 				deferral.Complete();
+			}
+		}
+
+		// Dragged data can carry a malformed URI; GetUriAsync throws UriFormatException for it.
+		private static async Task<Uri?> TryGetUriAsync(DataPackageView dataView)
+		{
+			try
+			{
+				return await dataView.GetUriAsync();
+			}
+			catch (UriFormatException)
+			{
+				return null;
 			}
 		}
 

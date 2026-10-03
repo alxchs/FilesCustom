@@ -55,7 +55,7 @@ namespace Files.App.ViewModels.Properties
 					drivePath,
 					Constants.ShellIconSizes.ExtraLarge,
 					true,
-					IconOptions.ReturnIconOnly | IconOptions.UseCurrentScale);
+					IconOptions.ReturnIconOnly);
 
 				if (result is not null)
 					ViewModel.IconData = result;
@@ -65,7 +65,7 @@ namespace Files.App.ViewModels.Properties
 						Drive.DeviceID,
 						Constants.ShellIconSizes.ExtraLarge,
 						true,
-						IconOptions.ReturnIconOnly | IconOptions.UseCurrentScale); // For network shortcuts
+						IconOptions.ReturnIconOnly); // For network shortcuts
 
 					ViewModel.IconData = result;
 				}
@@ -91,7 +91,7 @@ namespace Files.App.ViewModels.Properties
 			}
 			catch (Exception e)
 			{
-				App.Logger.LogWarning(e, "Failed to get sync root quota for path: {Path}", Drive.Path);
+				App.Logger.LogWarning(e, "Failed to get sync root quota for path: {Path}", LogPathHelper.RedactPath(Drive.Path));
 			}
 
 			try
@@ -100,7 +100,7 @@ namespace Files.App.ViewModels.Properties
 				string capacity = "System.Capacity";
 				string fileSystem = "System.Volume.FileSystem";
 
-				var properties = await diskRoot.Properties.RetrievePropertiesAsync([freeSpace, capacity, fileSystem]);
+				var properties = await diskRoot.Properties.RetrievePropertiesAsync((string[])[freeSpace, capacity, fileSystem]);
 
 				ViewModel.DriveCapacityValue = (ulong)properties[capacity];
 				ViewModel.DriveFreeSpaceValue = (ulong)properties[freeSpace];

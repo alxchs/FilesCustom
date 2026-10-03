@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System.Runtime.CompilerServices;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using WinRT;
 using ByteSize = ByteSizeLib.ByteSize;
 
 namespace Files.App.Data.Items
@@ -202,6 +203,10 @@ namespace Files.App.Data.Items
 		{
 			get
 			{
+				// CreateIconElement throws a catastrophic 0x8000FFFF on a null source, so wait for the icon to load before building one
+				if (Icon is null)
+					return null;
+
 				var source = new ImageIconSource() { ImageSource = Icon };
 				return source.CreateIconElement();
 			}
@@ -211,6 +216,7 @@ namespace Files.App.Data.Items
 
 		public FrameworkElement? ItemDecorator
 		{
+			[DynamicWindowsRuntimeCast(typeof(Style))]
 			get
 			{
 				if (!IsRemovable)
@@ -271,19 +277,6 @@ namespace Files.App.Data.Items
 			return item;
 		}
 
-		public async Task UpdateLabelAsync()
-		{
-			try
-			{
-				var root = Root!;
-				var properties = await root.Properties.RetrievePropertiesAsync(["System.ItemNameDisplay"])
-					.AsTask().WithTimeoutAsync(TimeSpan.FromSeconds(5));
-				Text = (string?)properties!["System.ItemNameDisplay"];
-			}
-			catch (NullReferenceException)
-			{
-			}
-		}
 
 		public async Task UpdatePropertiesAsync()
 		{
@@ -316,7 +309,7 @@ namespace Files.App.Data.Items
 				}
 
 				var root = Root ?? throw new InvalidOperationException("The drive root has not been initialized.");
-				var properties = await root.Properties.RetrievePropertiesAsync(["System.FreeSpace", "System.Capacity", "System.Volume.FileSystem"])
+				var properties = await root.Properties.RetrievePropertiesAsync((string[])["System.FreeSpace", "System.Capacity", "System.Volume.FileSystem"])
 					.AsTask().WithTimeoutAsync(TimeSpan.FromSeconds(5));
 
 				if (properties is not null && properties["System.Capacity"] is not null && properties["System.FreeSpace"] is not null)
@@ -378,7 +371,7 @@ namespace Files.App.Data.Items
 					DeviceID,
 					Constants.ShellIconSizes.Small,
 					false,
-					IconOptions.ReturnIconOnly | IconOptions.UseCurrentScale);
+					IconOptions.ReturnIconOnly);
 
 				IconData ??= result;
 			}

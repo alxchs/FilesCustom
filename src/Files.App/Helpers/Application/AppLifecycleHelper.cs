@@ -8,12 +8,12 @@ using Files.App.Services.SizeProvider;
 using Files.App.Utils.Logger;
 using Files.App.ViewModels.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Sentry;
 using Sentry.Protocol;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using Windows.ApplicationModel;
 using Windows.Storage;
@@ -107,15 +107,11 @@ namespace Files.App.Helpers
 
 			ActiveSessionTracker.ReportPersistedTime();
 
-			// Start off a list of tasks we need to run before we can continue startup
-			await Task.WhenAll(
-				App.QuickAccessManager.InitializeAsync()
-			);
-
-			// Start non-critical tasks without waiting for them to complete
+			// Start non-critical tasks without waiting; pinned loads alongside the others so its shell enumeration doesn't block them.
 			_ = Task.Run(async () =>
 			{
 				await Task.WhenAll(
+					App.QuickAccessManager.InitializeAsync(),
 					OptionalTaskAsync(CloudDrivesManager.UpdateDrivesAsync(), generalSettingsService.ShowCloudDrivesSection),
 					App.LibraryManager.UpdateLibrariesAsync(),
 					OptionalTaskAsync(WSLDistroManager.UpdateDrivesAsync(), generalSettingsService.ShowWslSection),
@@ -136,6 +132,8 @@ namespace Files.App.Helpers
 			{
 				// The follwing method invokes UI thread, so we run it in a separate task
 				await CheckAppUpdate();
+
+				await PeriodicallyCheckForUpdatesAsync();
 			});
 
 			static Task OptionalTaskAsync(Task task, bool condition)
@@ -164,10 +162,17 @@ namespace Files.App.Helpers
 				updateService.AreReleaseNotesAvailable &&
 				!ViewedReleaseNotes)
 			{
-				await MainWindow.Instance.DispatcherQueue.EnqueueOrInvokeAsync(async () =>
+				ViewedReleaseNotes = true;
+
+				// Open after the startup tabs have loaded so the release notes tab doesn't disturb the restored session order
+				_ = Task.Run(async () =>
 				{
-					await Ioc.Default.GetRequiredService<ICommandManager>().OpenReleaseNotes.ExecuteAsync();
-					ViewedReleaseNotes = true;
+					await MainPageViewModel.StartupTabsLoadedTask;
+
+					await MainWindow.Instance.DispatcherQueue.EnqueueOrInvokeAsync(async () =>
+					{
+						await Ioc.Default.GetRequiredService<ICommandManager>().OpenReleaseNotes.ExecuteAsync();
+					});
 				});
 			}
 
@@ -176,6 +181,31 @@ namespace Files.App.Helpers
 
 			if (IsAppUpdated)
 				await updateService.CheckAndUpdateFilesLauncherAsync();
+		}
+
+		/// <summary>
+		/// Periodically re-checks for updates while the app keeps running.
+		/// </summary>
+		public static async Task PeriodicallyCheckForUpdatesAsync()
+		{
+			var updateService = Ioc.Default.GetRequiredService<IUpdateService>();
+
+			var interval = AppEnvironment is AppEnvironment.SideloadPreview or AppEnvironment.StorePreview
+				? TimeSpan.FromHours(2)
+				: TimeSpan.FromHours(5);
+
+			using var timer = new PeriodicTimer(interval);
+			while (await timer.WaitForNextTickAsync())
+			{
+				if (updateService.IsUpdateAvailable)
+					break;
+
+				// CheckForUpdatesAsync resets IsUpdateAvailable, so skip while a download is in progress
+				if (updateService.IsUpdating)
+					continue;
+
+				await updateService.CheckForUpdatesAsync();
+			}
 		}
 
 		/// <summary>
@@ -196,27 +226,96 @@ namespace Files.App.Helpers
 					context.TransactionContext.Operation == ActiveSessionTracker.TransactionOperation ? 1.0 : null;
 				options.ProfilesSampleRate = 0.05;
 				options.Environment = AppEnvironment == AppEnvironment.StorePreview || AppEnvironment == AppEnvironment.SideloadPreview ? "preview" : "production";
+				options.CacheDirectoryPath = ApplicationData.Current.LocalFolder.Path;
 
 				options.DisableWinUiUnhandledExceptionIntegration();
+
+				options.SetBeforeSend(sentryEvent =>
+				{
+					if (sentryEvent.Message is { } message)
+					{
+						message.Message = SanitizeSentryText(message.Message);
+						message.Formatted = SanitizeSentryText(message.Formatted);
+					}
+
+					if (sentryEvent.SentryExceptions is { } sentryExceptions)
+					{
+						foreach (var sentryException in sentryExceptions)
+						{
+							sentryException.Value = SanitizeSentryText(sentryException.Value);
+
+							if (sentryException.Stacktrace?.Frames is { } frames)
+							{
+								foreach (var frame in frames)
+								{
+									frame.FileName = LogPathHelper.RedactUserName(frame.FileName);
+									frame.AbsolutePath = LogPathHelper.RedactUserName(frame.AbsolutePath);
+								}
+							}
+						}
+					}
+
+					foreach (var key in sentryEvent.Extra.Keys.ToList())
+					{
+						if (sentryEvent.Extra[key] is string text)
+							sentryEvent.SetExtra(key, SanitizeSentryText(text) ?? string.Empty);
+					}
+
+					return sentryEvent;
+				});
+
+				options.SetBeforeBreadcrumb(breadcrumb =>
+				{
+					var message = SanitizeSentryText(breadcrumb.Message);
+
+					Dictionary<string, string>? sanitizedData = null;
+					if (breadcrumb.Data is { } data)
+					{
+						foreach (var (key, value) in data)
+						{
+							var sanitizedValue = SanitizeSentryText(value);
+							if (sanitizedValue != value)
+							{
+								sanitizedData ??= new(data);
+								sanitizedData[key] = sanitizedValue ?? string.Empty;
+							}
+						}
+					}
+
+					if (message == breadcrumb.Message && sanitizedData is null)
+						return breadcrumb;
+
+					return new Breadcrumb(message!, breadcrumb.Type!, sanitizedData ?? breadcrumb.Data, breadcrumb.Category, breadcrumb.Level);
+				});
 			});
+		}
+
+		/// <summary>
+		/// Scrubs user names and file system paths from text before it is attached to a Sentry event.
+		/// </summary>
+		private static string? SanitizeSentryText(string? text)
+		{
+			return text is null ? null : LogPathHelper.SanitizeMessage(text);
 		}
 
 		/// <summary>
 		/// Configures DI (dependency injection) container.
 		/// </summary>
-		public static IHost ConfigureHost()
+		/// <param name="appModel">Constructed on the UI thread by the caller (its ctor is UI-thread-only).</param>
+		public static IServiceProvider ConfigureHost(AppModel appModel)
 		{
-			var builder = Host.CreateDefaultBuilder()
-				.UseContentRoot(Package.Current.InstalledLocation.Path)
-				.UseEnvironment(AppLifecycleHelper.AppEnvironment.ToString())
-				.ConfigureLogging(builder => builder
-					.ClearProviders()
-					.AddConsole()
+			var services = new ServiceCollection();
+			var fileLoggerProvider = new FileLoggerProvider(Path.Combine(ApplicationData.Current.LocalFolder.Path, "debug.log"));
+
+			services.AddSingleton(fileLoggerProvider);
+
+			services.AddLogging(builder => builder
 					.AddDebug()
-					.AddProvider(new FileLoggerProvider(Path.Combine(ApplicationData.Current.LocalFolder.Path, "debug.log")))
+					.AddProvider(fileLoggerProvider)
 					.AddProvider(new SentryLoggerProvider())
-					.SetMinimumLevel(LogLevel.Information))
-				.ConfigureServices(services => services
+					.SetMinimumLevel(LogLevel.Information));
+
+			services
 					// Settings services
 					.AddSingleton<IUserSettingsService, UserSettingsService>()
 					.AddSingleton<IAppearanceSettingsService, AppearanceSettingsService>(sp => new AppearanceSettingsService(((UserSettingsService)sp.GetRequiredService<IUserSettingsService>()).GetSharingContext()))
@@ -295,18 +394,17 @@ namespace Files.App.Helpers
 					.AddSingleton<StorageHistoryWrapper>()
 					.AddSingleton<FileTagsManager>()
 					.AddSingleton<LibraryManager>()
-					.AddSingleton<AppModel>()
-				);
+					.AddSingleton(appModel);
 
 			// Conditional DI
 			if (AppEnvironment is AppEnvironment.SideloadPreview or AppEnvironment.SideloadStable)
-				builder.ConfigureServices(s => s.AddSingleton<IUpdateService, SideloadUpdateService>());
+				services.AddSingleton<IUpdateService, SideloadUpdateService>();
 			else if (AppEnvironment is AppEnvironment.StorePreview or AppEnvironment.StoreStable)
-				builder.ConfigureServices(s => s.AddSingleton<IUpdateService, StoreUpdateService>());
+				services.AddSingleton<IUpdateService, StoreUpdateService>();
 			else
-				builder.ConfigureServices(s => s.AddSingleton<IUpdateService, DummyUpdateService>());
+				services.AddSingleton<IUpdateService, DummyUpdateService>();
 
-			return builder.Build();
+			return services.BuildServiceProvider();
 		}
 
 		/// <summary>
@@ -336,6 +434,7 @@ namespace Files.App.Helpers
 		// so recently thrown exceptions are buffered here to recover their stacks at crash time.
 		private const int RecentExceptionsCapacity = 16;
 		private static readonly Exception?[] _recentExceptions = new Exception?[RecentExceptionsCapacity];
+		private static readonly string?[] _recentExceptionStacks = new string?[RecentExceptionsCapacity];
 		private static int _recentExceptionsNext = -1;
 
 		[ThreadStatic]
@@ -356,8 +455,14 @@ namespace Files.App.Helpers
 				try
 				{
 					// Cancellations are routine app-wide and would evict the faults worth keeping
-					if (e.Exception is not OperationCanceledException)
-						_recentExceptions[(uint)Interlocked.Increment(ref _recentExceptionsNext) % RecentExceptionsCapacity] = e.Exception;
+					if (e.Exception is OperationCanceledException)
+						return;
+
+					var slot = (uint)Interlocked.Increment(ref _recentExceptionsNext) % RecentExceptionsCapacity;
+					_recentExceptions[slot] = e.Exception;
+
+					// COM/SEH exceptions arrive at the crash handler with an empty StackTrace, so snapshot the live stack now.
+					_recentExceptionStacks[slot] = e.Exception is COMException or SEHException ? Environment.StackTrace : null;
 				}
 				finally
 				{
@@ -373,11 +478,19 @@ namespace Files.App.Helpers
 
 			for (var i = Math.Max(0, next - RecentExceptionsCapacity + 1); i <= next; i++)
 			{
-				if (_recentExceptions[(uint)i % RecentExceptionsCapacity] is not Exception recent)
+				var slot = (uint)i % RecentExceptionsCapacity;
+				if (_recentExceptions[slot] is not Exception recent)
 					continue;
 
 				var text = recent.ToString();
 				builder.AppendLine(text[..Math.Min(text.Length, 1024)]);
+
+				if (string.IsNullOrEmpty(recent.StackTrace) && _recentExceptionStacks[slot] is string capturedStack)
+				{
+					builder.AppendLine("-- captured at throw --");
+					builder.AppendLine(capturedStack[..Math.Min(capturedStack.Length, 2048)]);
+				}
+
 				builder.AppendLine("----");
 			}
 
@@ -505,11 +618,11 @@ namespace Files.App.Helpers
 			catch
 			{
 				// Swallow any exception escaping the handler so it can't re-enter
-				// Application.UnhandledException before Process.Kill terminates the process.
+				// Application.UnhandledException before the process terminates.
 			}
 			finally
 			{
-				Process.GetCurrentProcess().Kill();
+				Environment.Exit(ex?.HResult ?? 1);
 			}
 		}
 

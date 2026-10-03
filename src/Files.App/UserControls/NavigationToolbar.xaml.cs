@@ -13,6 +13,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.System;
 using Windows.UI.Core;
+using WinRT;
 
 namespace Files.App.UserControls
 {
@@ -25,6 +26,8 @@ namespace Files.App.UserControls
 		private readonly ICommandManager Commands = Ioc.Default.GetRequiredService<ICommandManager>();
 		private readonly StatusCenterViewModel OngoingTasksViewModel = Ioc.Default.GetRequiredService<StatusCenterViewModel>();
 		private readonly IContentPageContext ContentPageContext = Ioc.Default.GetRequiredService<IContentPageContext>();
+
+		private (OmnibarMode Mode, string Text)? _pendingOmnibarText;
 
 		// Properties
 
@@ -170,6 +173,7 @@ namespace Files.App.UserControls
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		private async void Omnibar_QuerySubmitted(Omnibar sender, OmnibarQuerySubmittedEventArgs args)
 		{
 			if (ViewModel is not { } viewModel)
@@ -180,9 +184,14 @@ namespace Files.App.UserControls
 			// Path mode
 			if (mode == OmnibarPathMode)
 			{
-				await viewModel.HandleItemNavigationAsync(args.Text);
-				var pathPaneHolder = ContentPageContext.ShellPage.GetRequiredPaneHolder();
-				pathPaneHolder.FocusActivePane();
+				var submittedText = args.Text;
+				if (!await viewModel.HandleItemNavigationAsync(submittedText))
+				{
+					RestoreOmnibarText(viewModel, OmnibarPathMode, submittedText);
+					return;
+				}
+
+				ContentPageContext.ShellPage?.PaneHolder?.FocusActivePane();
 				return;
 			}
 
@@ -207,11 +216,11 @@ namespace Files.App.UserControls
 					return;
 				}
 
+				var submittedCommand = args.Text;
 				await DialogDisplayHelper.ShowDialogAsync(Strings.InvalidCommand.GetLocalizedResource(),
-					string.Format(Strings.InvalidCommandContent.GetLocalizedResource(), args.Text));
+					string.Format(Strings.InvalidCommandContent.GetLocalizedResource(), submittedCommand));
 
-				var commandPaneHolder = ContentPageContext.ShellPage.GetRequiredPaneHolder();
-				commandPaneHolder.FocusActivePane();
+				RestoreOmnibarText(viewModel, OmnibarCommandPaletteMode, submittedCommand);
 				return;
 			}
 
@@ -256,8 +265,8 @@ namespace Files.App.UserControls
 					viewModel.SaveSearchQueryToList(searchQuery);
 				}
 
-				var searchPaneHolder = ContentPageContext.ShellPage.GetRequiredPaneHolder();
-				searchPaneHolder.FocusActivePane();
+				// The shell page can be torn down during the awaited navigation above; skip focusing if its pane holder is gone
+				ContentPageContext.ShellPage?.PaneHolder?.FocusActivePane();
 				return;
 			}
 		}
@@ -407,20 +416,19 @@ namespace Files.App.UserControls
 			if (ViewModel is not { } viewModel)
 				return;
 
+			var pendingText = TakePendingOmnibarText(e.NewMode);
+
 			if (e.NewMode == OmnibarPathMode)
 			{
 				// Initialize with current working directory or fallback to home path
-				var workingDirectory = ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory;
-				viewModel.PathText = string.IsNullOrEmpty(workingDirectory)
-					? Constants.UserEnvironmentPaths.HomePath
-					: workingDirectory;
+				viewModel.PathText = pendingText ?? GetDefaultPathText();
 
 				await DispatcherQueue.EnqueueOrInvokeAsync(viewModel.PopulateOmnibarSuggestionsForPathMode);
 			}
 			else if (e.NewMode == OmnibarCommandPaletteMode)
 			{
-				// Clear text and load command suggestions
-				viewModel.OmnibarCommandPaletteModeText = string.Empty;
+				// Restore rejected input or clear text, then load command suggestions
+				viewModel.OmnibarCommandPaletteModeText = pendingText ?? string.Empty;
 
 				await DispatcherQueue.EnqueueOrInvokeAsync(viewModel.PopulateOmnibarSuggestionsForCommandPaletteMode);
 			}
@@ -451,16 +459,15 @@ namespace Files.App.UserControls
 				// Path Mode needs special handling when gaining focus since it has an unfocused state
 				if (Omnibar.CurrentSelectedMode == OmnibarPathMode)
 				{
-					var workingDirectory = ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory;
-					viewModel.PathText = string.IsNullOrEmpty(workingDirectory)
-						? Constants.UserEnvironmentPaths.HomePath
-						: workingDirectory;
+					viewModel.PathText = TakePendingOmnibarText(OmnibarPathMode) ?? GetDefaultPathText();
 
 					await DispatcherQueue.EnqueueOrInvokeAsync(viewModel.PopulateOmnibarSuggestionsForPathMode);
 				}
 			}
 			else
 			{
+				_pendingOmnibarText = null;
+
 				if (Omnibar.CurrentSelectedMode == OmnibarSearchMode)
 				{
 					ViewModel?.CancelSuggestionSearch();
@@ -471,13 +478,50 @@ namespace Files.App.UserControls
 			}
 		}
 
+		private void RestoreOmnibarText(NavigationToolbarViewModel viewModel, OmnibarMode mode, string text)
+		{
+			_pendingOmnibarText = (mode, text);
+
+			if (Omnibar.CurrentSelectedMode != mode)
+				Omnibar.CurrentSelectedMode = mode;
+			else if (mode == OmnibarPathMode)
+				viewModel.PathText = text;
+			else if (mode == OmnibarCommandPaletteMode)
+				viewModel.OmnibarCommandPaletteModeText = text;
+
+			Omnibar.FocusWithCaretAtEnd();
+		}
+
+		private string? TakePendingOmnibarText(OmnibarMode mode)
+		{
+			var pending = _pendingOmnibarText;
+			_pendingOmnibarText = null;
+			return pending?.Mode == mode ? pending.Value.Text : null;
+		}
+
+		private string GetDefaultPathText()
+		{
+			var workingDirectory = ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory;
+			return string.IsNullOrEmpty(workingDirectory)
+				? Constants.UserEnvironmentPaths.HomePath
+				: workingDirectory;
+		}
+
+		private void Omnibar_FocusRedirectRequested(Omnibar sender, EventArgs args)
+		{
+			// The omnibar TextBox regained focus on window reactivation; move focus to the active pane so we don't land in
+			// edit mode. Deferred so it runs after the in-progress focus change settles.
+			_pendingOmnibarText = null;
+			DispatcherQueue.TryEnqueue(() => ContentPageContext.ShellPage?.PaneHolder?.FocusActivePane());
+		}
+
 		private async void Omnibar_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
 		{
 			if (e.Key is VirtualKey.Escape)
 			{
 				Omnibar.IsFocused = false;
-				var paneHolder = ContentPageContext.ShellPage.GetRequiredPaneHolder();
-				paneHolder.FocusActivePane();
+				var paneHolder = ContentPageContext.ShellPage?.PaneHolder;
+				paneHolder?.FocusActivePane();
 			}
 			else if (e.Key is VirtualKey.Tab && Omnibar.IsFocused && !InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
 			{
@@ -494,6 +538,7 @@ namespace Files.App.UserControls
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		private void NavigationButtonOverflowFlyoutButton_LosingFocus(UIElement sender, LosingFocusEventArgs args)
 		{
 			// Prevent the Omnibar from taking focus if the overflow button is hidden while the button is focused
@@ -522,6 +567,8 @@ namespace Files.App.UserControls
 			await viewModel.PathBoxItem_Drop(sender, e);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(Style))]
 		private void BreadcrumbBarItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
 		{
 			if (sender is not FrameworkElement element || element.DataContext is not PathBoxItem pathBoxItem)

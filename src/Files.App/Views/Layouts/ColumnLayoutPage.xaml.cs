@@ -13,6 +13,7 @@ using System.IO;
 using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
+using WinRT;
 using DispatcherQueueTimer = Microsoft.UI.Dispatching.DispatcherQueueTimer;
 
 namespace Files.App.Views.Layouts
@@ -20,6 +21,7 @@ namespace Files.App.Views.Layouts
 	/// <summary>
 	/// Represents the base page of Column View
 	/// </summary>
+	[WinRT.GeneratedBindableCustomProperty([nameof(RowHeight), nameof(IconBoxSize)], [])]
 	public sealed partial class ColumnLayoutPage : BaseGroupableLayoutPage
 	{
 		// Fields
@@ -47,6 +49,10 @@ namespace Files.App.Views.Layouts
 		protected override SemanticZoom RootZoom => RootGridZoom;
 		public ScrollViewer? ContentScroller { get; private set; }
 
+		[DynamicWindowsRuntimeCast(typeof(ItemsStackPanel))]
+		protected override (int First, int Last) GetVisibleIndexRange()
+			=> FileList.ItemsPanelRoot is ItemsStackPanel panel ? (panel.FirstVisibleIndex, panel.LastVisibleIndex) : (-1, -1);
+
 		/// <summary>
 		/// Row height in the Columns View
 		/// </summary>
@@ -68,6 +74,7 @@ namespace Files.App.Views.Layouts
 		/// size changes, even if the layout size changes (since some layout sizes share the same icon size).
 		/// </summary>
 		private uint currentIconSize;
+		private ColumnsViewSizeKind? itemContainerSize;
 
 		private readonly IStorageArchiveService storageArchiveService = Ioc.Default.GetRequiredService<IStorageArchiveService>();
 
@@ -87,6 +94,7 @@ namespace Files.App.Views.Layouts
 			doubleClickTimer = DispatcherQueue.CreateTimer();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(Style))]
 		private void SetOpenedFolder(ListViewItem? lvi)
 		{
 			SetRowStyle(openedFolderPresenter, null);
@@ -128,6 +136,7 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
 		private void ColumnViewBase_ItemInvoked(object? sender, EventArgs e)
 		{
 			SetOpenedFolder(FileList.ContainerFromItem(FileList.SelectedItem) as ListViewItem);
@@ -152,6 +161,7 @@ namespace Files.App.Views.Layouts
 			ContentScroller?.ChangeView(null, 0, null, true);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
 		protected override void ItemManipulationModel_FocusSelectedItemsInvoked(object? sender, EventArgs e)
 		{
 			if (SelectedItems?.Any() ?? false)
@@ -174,6 +184,7 @@ namespace Files.App.Views.Layouts
 			FileList?.SelectedItems.Remove(e);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		protected override void OnNavigatedTo(NavigationEventArgs eventArgs)
 		{
 			if (eventArgs.Parameter is NavigationArguments navArgs)
@@ -195,6 +206,7 @@ namespace Files.App.Views.Layouts
 			SetItemContainerStyle();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
 		private void HighlightPathDirectory(ListViewBase sender, ContainerContentChangingEventArgs args)
 		{
 			if (args.Item is ListedItem item && columnsOwner?.OwnerPath is string ownerPath)
@@ -275,6 +287,8 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
+		[DynamicWindowsRuntimeCast(typeof(TextBlock))]
 		protected override void EndRename(TextBox textBox)
 		{
 			FileNameTeachingTip.IsOpen = false;
@@ -307,6 +321,7 @@ namespace Files.App.Views.Layouts
 			// throw new NotImplementedException();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
 		protected override bool CanGetItemFromElement(object element)
 			=> element is ListViewItem;
 
@@ -315,27 +330,23 @@ namespace Files.App.Views.Layouts
 		/// </summary>
 		private void SetItemContainerStyle()
 		{
-			if (UserSettingsService.LayoutSettingsService.ColumnsViewSize == ColumnsViewSizeKind.Compact)
-			{
-				// Toggle style to force item size to update
-				FileList.ItemContainerStyle = RegularItemContainerStyle;
+			var size = UserSettingsService.LayoutSettingsService.ColumnsViewSize;
+			if (itemContainerSize == size)
+				return;
 
-				// Set correct style
-				FileList.ItemContainerStyle = CompactItemContainerStyle;
-			}
-			else
-			{
-				// Toggle style to force item size to update
-				FileList.ItemContainerStyle = CompactItemContainerStyle;
-
-				// Set correct style
-				FileList.ItemContainerStyle = RegularItemContainerStyle;
-			}
+			FileList.ItemContainerStyle = size == ColumnsViewSizeKind.Compact ? RegularItemContainerStyle : CompactItemContainerStyle;
+			FileList.ItemContainerStyle = size == ColumnsViewSizeKind.Compact ? CompactItemContainerStyle : RegularItemContainerStyle;
+			itemContainerSize = size;
 		}
 
 		public override void Dispose()
 		{
+			Bindings.StopTracking();
 			storageArchiveService.CompressionCompleted -= StorageArchiveService_CompressionCompleted;
+			UserSettingsService.LayoutSettingsService.PropertyChanged -= LayoutSettingsService_PropertyChanged;
+			if (ParentShellPageInstance?.ShellViewModel is { } shellViewModel)
+				shellViewModel.ItemLoadStatusChanged -= OnItemLoadStatusChanged;
+
 			base.Dispose();
 			columnsOwner = null;
 		}
@@ -519,11 +530,14 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		private async void FileList_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
 		{
 			doubleClickTimer.Stop();
 
 			var clickedItem = e.OriginalSource as FrameworkElement;
+
+			CancelRenameOnDoubleClick(clickedItem?.DataContext as ListedItem);
 
 			if (clickedItem?.DataContext is ListedItem item)
 			{
@@ -562,6 +576,7 @@ namespace Files.App.Views.Layouts
 			isRightButtonPressed = e.GetCurrentPoint(null).Properties.IsRightButtonPressed;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
 		private void HandleRightClick()
 		{
 			if (ParentShellPageInstance is UIElement element &&
@@ -570,6 +585,10 @@ namespace Files.App.Views.Layouts
 				element.Focus(FocusState.Programmatic);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(TextBlock))]
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		private async void FileList_ItemTapped(object sender, TappedRoutedEventArgs e)
 		{
 			var ctrlPressed = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down);
@@ -600,6 +619,20 @@ namespace Files.App.Views.Layouts
 			}
 			else if (item is not null)
 			{
+				if (IsWithinRenameDoubleClickWindow && item == RenamingItem)
+				{
+					// A tap this soon after the tap that started renaming is the second click of a double click
+					CancelRenameOnDoubleClick(item);
+					ResetRenameDoubleClick();
+
+					if (isItemFile)
+						await Commands.OpenItem.ExecuteAsync();
+					else if (isItemFolder)
+						ItemInvoked?.Invoke(new ColumnParam { Source = this, NavPathParam = item is IShortcutItem { TargetPath.Length: > 0 } shortcut ? shortcut.TargetPath : item.ItemPath, ListView = FileList }, EventArgs.Empty);
+
+					return;
+				}
+
 				var clickedItem = e.OriginalSource as FrameworkElement;
 				if (clickedItem is TextBlock textBlock && textBlock.Name == "ItemName")
 				{
@@ -646,6 +679,7 @@ namespace Files.App.Views.Layouts
 			TimeSpan.FromMilliseconds(200));
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(Grid))]
 		private void Grid_Loaded(object sender, RoutedEventArgs e)
 		{
 			var itemContainer = (sender as Grid)?.FindAscendant<ListViewItem>();

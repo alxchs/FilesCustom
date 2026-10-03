@@ -28,15 +28,10 @@ namespace Files.App.Utils.Storage
 		{
 			return STATask.Run(() =>
 			{
-				System.Windows.Forms.Clipboard.Clear();
-				var fileList = new System.Collections.Specialized.StringCollection();
-				fileList.AddRange(filesToCopy);
-				MemoryStream dropEffect = new MemoryStream(operation == DataPackageOperation.Copy ?
-					[5, 0, 0, 0] : [2, 0, 0, 0]);
-				var data = new System.Windows.Forms.DataObject();
-				data.SetFileDropList(fileList);
-				data.SetData("Preferred DropEffect", dropEffect);
-				System.Windows.Forms.Clipboard.SetDataObject(data, true);
+				uint preferredDropEffect = (uint)(operation == DataPackageOperation.Copy
+					? DataPackageOperation.Copy | DataPackageOperation.Link
+					: DataPackageOperation.Move);
+				ShellDataObject.SetClipboard(filesToCopy, preferredDropEffect);
 			}, App.Logger);
 		}
 
@@ -723,6 +718,14 @@ namespace Files.App.Utils.Storage
 						? new ShellLink(linkPath, SLR_FLAGS.SLR_NO_UI_WITH_MSG_PUMP, timeout: TimeSpan.FromMilliseconds(100))
 						: new ShellLink(linkPath, resolve: false);
 					targetPath = link.TargetPath;
+
+					// Broken shortcut (rooted target that's gone) keeps the delete prompt; app/shell targets aren't rooted
+					if (resolveTarget && Path.IsPathRooted(targetPath) &&
+						!targetPath.StartsWith(@"\\", StringComparison.Ordinal) && !Path.Exists(targetPath))
+					{
+						return new ShellLinkItem { TargetPath = targetPath, InvalidTarget = true };
+					}
+
 					return ShellFolderExtensions.GetShellLinkItem(link);
 				}
 				else if (FileExtensionHelpers.IsWebLinkFile(linkPath))
@@ -996,7 +999,7 @@ namespace Files.App.Utils.Storage
 							using var si = new ShellItem(destination);
 							if (si.IsFolder) // File tag is not copied automatically for folders
 							{
-								FileTagsHelper.WriteFileTag(destination, tag);
+								_ = FileTagsHelper.WriteFileTagAsync(destination, tag);
 							}
 						}
 						else

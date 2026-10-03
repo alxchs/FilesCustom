@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.Win32;
+using WinRT;
 
 namespace Files.App.Views.Layouts
 {
@@ -27,6 +28,7 @@ namespace Files.App.Views.Layouts
 		// Fields
 
 		protected int NextRenameIndex = 0;
+		protected TextBox? renameTextBox;
 
 		// Properties
 
@@ -98,6 +100,10 @@ namespace Files.App.Views.Layouts
 			ItemManipulationModel.RefreshItemsThumbnailInvoked -= ItemManipulationModel_RefreshItemsThumbnail;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(Button))]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
+		[DynamicWindowsRuntimeCast(typeof(PasswordBox))]
 		protected override void Page_CharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args)
 		{
 			if (ParentShellPageInstance is null ||
@@ -178,6 +184,7 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		protected virtual void ItemManipulationModel_FocusFileListInvoked(object? sender, EventArgs e)
 		{
 			try
@@ -273,6 +280,9 @@ namespace Files.App.Views.Layouts
 		protected static bool ShouldShowExtensionInRename(ListedItem item) =>
 			(!item.IsFolder || item.IsArchive) && !item.IsShortcut && item is not AlternateStreamItem;
 
+		[DynamicWindowsRuntimeCast(typeof(ListViewItem))]
+		[DynamicWindowsRuntimeCast(typeof(TextBlock))]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		protected virtual void StartRenameItem(string itemNameTextBox)
 		{
 			RenamingItem = SelectedItem;
@@ -318,6 +328,28 @@ namespace Files.App.Views.Layouts
 
 			textBox.Select(0, selectedTextLength);
 			IsRenamingItem = true;
+
+			renameTextBox = textBox;
+			if (guardRenameFromDoubleClick)
+				DeferRenameTextBoxHitTesting(textBox);
+		}
+
+		protected async void DeferRenameTextBoxHitTesting(TextBox textBox)
+		{
+			// Lets a double click pass through to the list so it opens the item instead of landing in the text box
+			textBox.IsHitTestVisible = false;
+			await Task.Delay(RenameDoubleClickGuardDuration);
+			textBox.IsHitTestVisible = true;
+		}
+
+		protected void CancelRenameOnDoubleClick(ListedItem? item)
+		{
+			if (item is null || item != RenamingItem || renameTextBox is null || !IsRenameDoubleClickGuardActive)
+				return;
+
+			renameTextBox.LostFocus -= RenameTextBox_LostFocus;
+			renameTextBox.Text = OldItemName;
+			EndRename(renameTextBox);
 		}
 
 		protected virtual async Task CommitRenameAsync(TextBox textBox)
@@ -333,6 +365,9 @@ namespace Files.App.Views.Layouts
 			await UIFilesystemHelpers.RenameFileItemAsync(renamingItem, newItemName, parentShellPage, nameIsComplete: ShouldShowExtensionInRename(renamingItem));
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(AppBarButton))]
+		[DynamicWindowsRuntimeCast(typeof(Popup))]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		protected virtual async void RenameTextBox_LostFocus(object sender, RoutedEventArgs e)
 		{
 			try
@@ -352,6 +387,7 @@ namespace Files.App.Views.Layouts
 
 		// Methods
 
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		protected async void RenameTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
 		{
 			var textBox = (TextBox)sender;

@@ -32,12 +32,12 @@ namespace Files.App.Utils.Taskbar
 
 			fixed (char* ptr = text)
 			{
-				var pWindProc = Marshal.GetFunctionPointerForDelegate(_windowProcedure);
+				var pWindProc = Marshal.GetFunctionPointerForDelegate<WNDPROC>(_windowProcedure);
 				var pfnWndProc = (delegate* unmanaged[Stdcall]<HWND, uint, WPARAM, LPARAM, LRESULT>)pWindProc;
 
 				WNDCLASSEXW param = new()
 				{
-					cbSize = (uint)Marshal.SizeOf(typeof(WNDCLASSEXW)),
+					cbSize = (uint)Marshal.SizeOf<WNDCLASSEXW>(),
 					style = WNDCLASS_STYLES.CS_DBLCLKS,
 					lpfnWndProc = pfnWndProc,
 					cbClsExtra = 0,

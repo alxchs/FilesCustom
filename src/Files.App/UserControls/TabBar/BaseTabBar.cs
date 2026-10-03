@@ -4,6 +4,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Runtime.CompilerServices;
+using WinRT;
 
 namespace Files.App.UserControls.TabBar
 {
@@ -81,7 +82,10 @@ namespace Files.App.UserControls.TabBar
 
 		protected void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
 		{
-			CloseTab(args.Item as TabBarItem);
+			var tabItem = args.Item as TabBarItem;
+
+			// Defer: removing inside the close-requested callback trips ObservableCollection reentrancy.
+			DispatcherQueue.TryEnqueue(() => CloseTab(tabItem));
 		}
 
 		protected void OnCurrentInstanceChanged(CurrentInstanceChangedEventArgs args)
@@ -142,6 +146,7 @@ namespace Files.App.UserControls.TabBar
 			await MultitaskingTabsHelpers.MoveTabToNewWindow(tabItem, this);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(Frame))]
 		public void CloseTab(TabBarItem? tabItem)
 		{
 			if (tabItem is null)
@@ -159,10 +164,13 @@ namespace Files.App.UserControls.TabBar
 			// Save the updated tab list
 			AppLifecycleHelper.SaveSessionTabs();
 
+			AppMemoryHelper.RequestTrim();
+
 			if (Items.Count == 0)
 				MainWindow.Instance.Close();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(Control))]
 		public void SetLoadingIndicatorStatus(ITabBarItem item, bool loading)
 		{
 			if (ContainerFromItem(item) is not Control tabItem)

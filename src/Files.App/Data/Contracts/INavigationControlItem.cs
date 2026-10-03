@@ -7,10 +7,6 @@ namespace Files.App.Data.Contracts
 {
 	public interface INavigationControlItem : IComparable<INavigationControlItem>, INotifyPropertyChanged, ISidebarItemModel, ISidebarItemPresentationModel
 	{
-		public new string? Text { get; }
-
-		public new string? Path { get; }
-
 		public SectionType Section { get; }
 
 		public NavigationControlItemType ItemType { get; }

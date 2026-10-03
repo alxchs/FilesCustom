@@ -1,12 +1,14 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using CommunityToolkit.WinUI;
 using Files.App.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -16,6 +18,7 @@ using System.Runtime.CompilerServices;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.UI.ViewManagement;
+using WinRT;
 using GridSplitter = Files.App.Controls.GridSplitter;
 
 namespace Files.App.Views
@@ -719,6 +722,7 @@ namespace Files.App.Views
 		private static readonly string[] _cornerProps =
 			["TopLeftRadius", "TopRightRadius", "BottomRightRadius", "BottomLeftRadius"];
 
+		[DynamicWindowsRuntimeCast(typeof(SolidColorBrush))]
 		private SpriteVisual GetOrCreateIndicatorVisual()
 		{
 			if (_indicatorVisual is not null)
@@ -931,6 +935,7 @@ namespace Files.App.Views
 			WindowIsCompact = MainWindow.Instance.Bounds.Width <= Constants.UI.MultiplePaneWidthThreshold;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
 		private void Pane_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (sender is UIElement element)
@@ -955,8 +960,14 @@ namespace Files.App.Views
 			};
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
+		[DynamicWindowsRuntimeCast(typeof(ButtonBase))]
 		private void Pane_PointerPressed(object sender, PointerRoutedEventArgs e)
 		{
+			// A button cancels its press once it loses focus, so leave focus alone while one is being pressed
+			if ((e.OriginalSource as DependencyObject)?.FindAscendantOrSelf<ButtonBase>() is not null)
+				return;
+
 			// Focus pane if interaction suggests intent to focus:
 			// 1. Sender is not the currently active pane (user is switching panes), or the sender is the active pane,
 			// but the user is refocusing the pane (e.g. user taps pane to refocus while the Omnibar flyout is open)
@@ -989,6 +1000,7 @@ namespace Files.App.Views
 				ActivePane = newActivePane;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
 		private void Pane_RightTapped(object sender, RoutedEventArgs e)
 		{
 			if (sender != ActivePane && sender is IShellPage shellPage && shellPage.SlimContentPage is not ColumnsLayoutPage)
@@ -1048,7 +1060,7 @@ namespace Files.App.Views
 
 		public void Dispose()
 		{
-			App.Logger.LogInformation($"ShellPanesPage.Dispose: PaneCount={GetPaneCount()}, ActivePane={LogPathHelper.GetPathIdentifier(ActivePane?.TabBarItemParameter?.NavigationParameter?.ToString())}");
+			App.Logger.LogInformation($"ShellPanesPage.Dispose: PaneCount={GetPaneCount()}, ActivePane={LogPathHelper.RedactPath(ActivePane?.TabBarItemParameter?.NavigationParameter?.ToString())}");
 
 			TabBar.TabDragStarted -= TabBar_TabDragStarted;
 			TabBar.TabDragCompleted -= TabBar_TabDragCompleted;

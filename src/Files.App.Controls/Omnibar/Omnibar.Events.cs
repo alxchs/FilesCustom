@@ -3,6 +3,7 @@
 
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
+using WinRT;
 
 namespace Files.App.Controls
 {
@@ -14,22 +15,23 @@ namespace Files.App.Controls
 			_textBoxSuggestionsContainerBorder.Width = ActualWidth;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(UIElement))]
 		private void AutoSuggestBox_GettingFocus(UIElement sender, GettingFocusEventArgs args)
 		{
 			if (args.OldFocusedElement is null)
 			{
-				// Window is regaining activation and restoring focus to the TextBox - redirect
-				// to whatever was focused before, so the omnibar doesn't get stuck in edit mode.
-				if (args.InputDevice is FocusInputDeviceKind.None &&
-					_previouslyFocusedElement.TryGetTarget(out var previous) &&
-					previous is not null)
-					args.TrySetNewFocusedElement(previous);
+				// Window is regaining activation and restoring focus to the TextBox. TrySetNewFocusedElement can't
+				// move focus to the previously-focused item (it's often a recycled list item and gets rejected), so
+				// ask the host to move focus to its content instead, keeping the omnibar out of edit mode.
+				_placeCaretAtEndOnFocus = false;
+				FocusRedirectRequested?.Invoke(this, System.EventArgs.Empty);
 				return;
 			}
 
 			_previouslyFocusedElement = new(args.OldFocusedElement as UIElement);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(Button))]
 		private void AutoSuggestBox_LosingFocus(UIElement sender, LosingFocusEventArgs args)
 		{
 			// Programmatic focus moves (InputDevice == None) while the user is typing in the
@@ -57,9 +59,17 @@ namespace Files.App.Controls
 			IsFocused = true;
 			IsFocusedChanged?.Invoke(this, new(IsFocused));
 
-			_textBox.SelectAll();
+			if (_placeCaretAtEndOnFocus)
+			{
+				_placeCaretAtEndOnFocus = false;
+				_textBox.Select(_textBox.Text.Length, 0);
+			}
+			else
+				_textBox.SelectAll();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FlyoutBase))]
+		[DynamicWindowsRuntimeCast(typeof(Popup))]
 		private void AutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
 		{
 			// TextBox still has focus if the context menu for selected text is open
@@ -69,6 +79,7 @@ namespace Files.App.Controls
 
 			GlobalHelper.WriteDebugStringForOmnibar("The TextBox lost the focus.");
 
+			_placeCaretAtEndOnFocus = false;
 			IsFocused = false;
 			IsFocusedChanged?.Invoke(this, new(IsFocused));
 		}

@@ -17,42 +17,59 @@ namespace Files.App.Services
 
 		public async IAsyncEnumerable<IFolder> GetDrivesAsync()
 		{
-			var list = DriveInfo.GetDrives();
 			var pCloudDrivePath = App.AppModel.PCloudDrivePath;
-			foreach (var drive in list)
-			{
-				if (!drive.IsReady)
-					continue;
+			var drives = await Task.Run(DriveInfo.GetDrives).ConfigureAwait(false);
 
-				var driveLabel = DriveHelpers.GetExtendedDriveLabel(drive);
-				// Filter out cloud drives
-				// We don't want cloud drives to appear in the plain "Drives" sections.
-				if (driveLabel.Equals("Google Drive") || drive.Name.Equals(pCloudDrivePath))
-					continue;
+			// Probe drives in parallel so one slow drive doesn't delay the rest
+			var pending = drives.Select(drive => GetDriveItemAsync(drive, pCloudDrivePath)).ToList();
+
+			await foreach (var completed in Task.WhenEach(pending))
+			{
+				if (await completed is { } driveItem)
+					yield return driveItem;
+			}
+		}
+
+		private static async Task<IFolder?> GetDriveItemAsync(DriveInfo drive, string pCloudDrivePath)
+		{
+			try
+			{
+				// IsReady and the label read can block for a long time, so give each probe its own thread
+				var probe = await Task.Factory.StartNew<(string Label, Data.Items.DriveType Type)?>(
+					() => drive.IsReady
+						? (DriveHelpers.GetExtendedDriveLabel(drive), DriveHelpers.GetDriveType(drive))
+						: null,
+					CancellationToken.None,
+					TaskCreationOptions.LongRunning,
+					TaskScheduler.Default);
+
+				if (probe is not { } info)
+					return null;
+
+				// Filter out cloud drives; we don't want them in the plain "Drives" sections.
+				if (info.Label.Equals("Google Drive") || drive.Name.Equals(pCloudDrivePath))
+					return null;
 
 				var res = await FilesystemTasks.Wrap(() => StorageFolder.GetFolderFromPathAsync(drive.Name).AsTask());
-				if (res.ErrorCode is FileSystemStatusCode.Unauthorized)
+				if (res.ErrorCode is FileSystemStatusCode.Unauthorized || !res)
 				{
 					App.Logger.LogWarning($"{res.ErrorCode}: Attempting to add the device, {drive.Name},"
 						+ " failed at the StorageFolder initialization step. This device will be ignored.");
-					continue;
-				}
-				else if (!res)
-				{
-					App.Logger.LogWarning($"{res.ErrorCode}: Attempting to add the device, {drive.Name},"
-						+ " failed at the StorageFolder initialization step. This device will be ignored.");
-					continue;
+					return null;
 				}
 
 				var root = res.Result!;
 				using var thumbnail = await DriveHelpers.GetThumbnailAsync(root);
-				var type = DriveHelpers.GetDriveType(drive);
-				var label = DriveHelpers.GetExtendedDriveLabel(drive);
-				var driveItem = await DriveItem.CreateFromPropertiesAsync(root, drive.Name.TrimEnd('\\'), label, type, thumbnail);
+				var driveItem = await DriveItem.CreateFromPropertiesAsync(root, drive.Name.TrimEnd('\\'), info.Label, info.Type, thumbnail);
 
 				App.Logger.LogInformation($"Drive added: {driveItem.Path}, {driveItem.Type}");
 
-				yield return driveItem;
+				return driveItem;
+			}
+			catch (Exception ex)
+			{
+				App.Logger.LogWarning(ex, $"Failed to load the drive {drive.Name}");
+				return null;
 			}
 		}
 

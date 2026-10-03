@@ -35,6 +35,13 @@ namespace Files.App.ViewModels
 
 		public static ObservableCollection<TabBarItem> AppInstances { get; private set; } = [];
 
+		private static volatile TaskCompletionSource startupTabsTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		/// <summary>
+		/// Gets a task that completes once the startup tabs have been added.
+		/// </summary>
+		public static Task StartupTabsLoadedTask => startupTabsTcs.Task;
+
 		public List<ITabBar> MultitaskingControls { get; } = [];
 
 		public ITabBar? MultitaskingControl { get; set; }
@@ -117,27 +124,52 @@ namespace Files.App.ViewModels
 			context.PageType is not ContentPageTypes.ReleaseNotes &&
 			context.PageType is not ContentPageTypes.Settings;
 
+		private bool canShowPrompts;
+
+		public void OnPageLoaded()
+		{
+			if (canShowPrompts)
+				return;
+
+			canShowPrompts = true;
+			OnPropertyChanged(nameof(ShowReviewPrompt));
+			OnPropertyChanged(nameof(ShowSponsorPrompt));
+		}
+
+		private static bool hasShownReviewPrompt;
+
 		public bool ShowReviewPrompt
 		{
 			get
 			{
+				if (!canShowPrompts || hasShownReviewPrompt)
+					return false;
+
 				var isTargetEnvironment = AppLifecycleHelper.AppEnvironment is AppEnvironment.StoreStable or AppEnvironment.StorePreview;
 				var hasClickedReviewPrompt = UserSettingsService.ApplicationSettingsService.HasClickedReviewPrompt;
-				var launchCountReached = AppLifecycleHelper.TotalLaunchCount == 30;
+				var launchCountReached = AppLifecycleHelper.TotalLaunchCount % 30 == 0;
 
-				return isTargetEnvironment && !hasClickedReviewPrompt && launchCountReached;
+				hasShownReviewPrompt = isTargetEnvironment && !hasClickedReviewPrompt && launchCountReached;
+				return hasShownReviewPrompt;
 			}
 		}
+
+		// Ensures the sponsor prompt is only displayed once per app session
+		private static bool hasShownSponsorPrompt;
 
 		public bool ShowSponsorPrompt
 		{
 			get
 			{
+				if (!canShowPrompts || hasShownSponsorPrompt)
+					return false;
+
 				var isTargetEnvironment = AppLifecycleHelper.AppEnvironment is AppEnvironment.Dev or AppEnvironment.SideloadStable or AppEnvironment.SideloadPreview;
 				var hasClickedSponsorPrompt = UserSettingsService.ApplicationSettingsService.HasClickedSponsorPrompt;
-				var launchCountReached = AppLifecycleHelper.TotalLaunchCount == 30;
+				var launchCountReached = AppLifecycleHelper.TotalLaunchCount % 50 == 0;
 
-				return isTargetEnvironment && !hasClickedSponsorPrompt && launchCountReached;
+				hasShownSponsorPrompt = isTargetEnvironment && !hasClickedSponsorPrompt && launchCountReached;
+				return hasShownSponsorPrompt;
 			}
 		}
 
@@ -145,9 +177,7 @@ namespace Files.App.ViewModels
 
 		public ICommand NavigateToNumberedTabKeyboardAcceleratorCommand { get; }
 		public ICommand ReviewAppCommand { get; }
-		public ICommand DismissReviewPromptCommand { get; }
 		public ICommand SponsorCommand { get; }
-		public ICommand DismissSponsorPromptCommand { get; }
 		public ICommand OpenNetworkSharingSettingsCommand { get; }
 
 		// Constructor
@@ -156,9 +186,7 @@ namespace Files.App.ViewModels
 		{
 			NavigateToNumberedTabKeyboardAcceleratorCommand = new RelayCommand<KeyboardAcceleratorInvokedEventArgs>(ExecuteNavigateToNumberedTabKeyboardAcceleratorCommand);
 			ReviewAppCommand = new RelayCommand(ExecuteReviewAppCommand);
-			DismissReviewPromptCommand = new RelayCommand(ExecuteDismissReviewPromptCommand);
 			SponsorCommand = new RelayCommand(ExecuteSponsorCommand);
-			DismissSponsorPromptCommand = new RelayCommand(ExecuteDismissSponsorPromptCommand);
 			OpenNetworkSharingSettingsCommand = new AsyncRelayCommand(ExecuteOpenNetworkSharingSettingsCommand);
 
 			AppearanceSettingsService.PropertyChanged += (s, e) =>
@@ -222,81 +250,92 @@ namespace Files.App.ViewModels
 				ignoreStartupSettings = mainPageNavigationArguments.IgnoreStartupSettings;
 			}
 
-			if (parameter is null || (parameter is string eventStr && string.IsNullOrEmpty(eventStr)))
+			// Re-arm the signal when tabs load again after closing to the background
+			if (startupTabsTcs.Task.IsCompleted)
+				startupTabsTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+			try
 			{
-				try
-				{
-					// add last session tabs to closed tabs stack if those tabs are not about to be opened
-					if (!UserSettingsService.AppSettingsService.RestoreTabsOnStartup && !UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp && UserSettingsService.GeneralSettingsService.LastSessionTabList != null)
-					{
-						var items = UserSettingsService.GeneralSettingsService.LastSessionTabList
-							.Where(tab => !string.IsNullOrEmpty(tab))
-							.Select(tab => TabBarItemParameter.Deserialize(tab)).ToArray();
-
-						BaseTabBar.PushRecentTab(items);
-					}
-
-					if (UserSettingsService.AppSettingsService.RestoreTabsOnStartup)
-					{
-						UserSettingsService.AppSettingsService.RestoreTabsOnStartup = false;
-						if (UserSettingsService.GeneralSettingsService.LastSessionTabList is not null)
-						{
-							await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
-
-							if (!UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp)
-								UserSettingsService.GeneralSettingsService.LastSessionTabList = null;
-						}
-					}
-					else if (UserSettingsService.GeneralSettingsService.OpenSpecificPageOnStartup &&
-						UserSettingsService.GeneralSettingsService.TabsOnStartupList is not null)
-					{
-						foreach (string path in UserSettingsService.GeneralSettingsService.TabsOnStartupList)
-							await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), path, true);
-					}
-					else if (UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp &&
-						UserSettingsService.GeneralSettingsService.LastSessionTabList is not null)
-					{
-						if (AppInstances.Count == 0)
-							await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
-					}
-					else
-					{
-						await NavigationHelpers.AddNewTabAsync();
-					}
-				}
-				catch
-				{
-					await NavigationHelpers.AddNewTabAsync();
-				}
-			}
-			else
-			{
-				if (!ignoreStartupSettings)
+				if (parameter is null || (parameter is string eventStr && string.IsNullOrEmpty(eventStr)))
 				{
 					try
 					{
-						if (UserSettingsService.GeneralSettingsService.OpenSpecificPageOnStartup &&
-								UserSettingsService.GeneralSettingsService.TabsOnStartupList is not null)
+						// add last session tabs to closed tabs stack if those tabs are not about to be opened
+						if (!UserSettingsService.AppSettingsService.RestoreTabsOnStartup && !UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp && UserSettingsService.GeneralSettingsService.LastSessionTabList != null)
+						{
+							var items = UserSettingsService.GeneralSettingsService.LastSessionTabList
+								.Where(tab => !string.IsNullOrEmpty(tab))
+								.Select(tab => TabBarItemParameter.Deserialize(tab)).ToArray();
+
+							BaseTabBar.PushRecentTab(items);
+						}
+
+						if (UserSettingsService.AppSettingsService.RestoreTabsOnStartup)
+						{
+							UserSettingsService.AppSettingsService.RestoreTabsOnStartup = false;
+							if (UserSettingsService.GeneralSettingsService.LastSessionTabList is not null)
+							{
+								await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
+
+								if (!UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp)
+									UserSettingsService.GeneralSettingsService.LastSessionTabList = null;
+							}
+						}
+						else if (UserSettingsService.GeneralSettingsService.OpenSpecificPageOnStartup &&
+							UserSettingsService.GeneralSettingsService.TabsOnStartupList is not null)
 						{
 							foreach (string path in UserSettingsService.GeneralSettingsService.TabsOnStartupList)
 								await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), path, true);
 						}
 						else if (UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp &&
-							UserSettingsService.GeneralSettingsService.LastSessionTabList is not null &&
-							AppInstances.Count == 0)
+							UserSettingsService.GeneralSettingsService.LastSessionTabList is not null)
 						{
-							await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
+							if (AppInstances.Count == 0)
+								await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
+						}
+						else
+						{
+							await NavigationHelpers.AddNewTabAsync();
 						}
 					}
-					catch { }
+					catch
+					{
+						await NavigationHelpers.AddNewTabAsync();
+					}
 				}
+				else
+				{
+					if (!ignoreStartupSettings)
+					{
+						try
+						{
+							if (UserSettingsService.GeneralSettingsService.OpenSpecificPageOnStartup &&
+									UserSettingsService.GeneralSettingsService.TabsOnStartupList is not null)
+							{
+								foreach (string path in UserSettingsService.GeneralSettingsService.TabsOnStartupList)
+									await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), path, true);
+							}
+							else if (UserSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp &&
+								UserSettingsService.GeneralSettingsService.LastSessionTabList is not null &&
+								AppInstances.Count == 0)
+							{
+								await RestoreSessionTabsAsync(UserSettingsService.GeneralSettingsService.LastSessionTabList);
+							}
+						}
+						catch { }
+					}
 
-				if (parameter is string navArgs)
-					await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), navArgs, true);
-				else if (parameter is PaneNavigationArguments paneArgs)
-					await NavigationHelpers.AddNewTabByParamAsync(typeof(ShellPanesPage), paneArgs);
-				else if (parameter is TabBarItemParameter tabArgs)
-					await NavigationHelpers.AddNewTabByParamAsync(tabArgs.InitialPageType, tabArgs.NavigationParameter);
+					if (parameter is string navArgs)
+						await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), navArgs, true);
+					else if (parameter is PaneNavigationArguments paneArgs)
+						await NavigationHelpers.AddNewTabByParamAsync(typeof(ShellPanesPage), paneArgs);
+					else if (parameter is TabBarItemParameter tabArgs)
+						await NavigationHelpers.AddNewTabByParamAsync(tabArgs.InitialPageType, tabArgs.NavigationParameter);
+				}
+			}
+			finally
+			{
+				startupTabsTcs.TrySetResult();
 			}
 
 			// Load the app theme resources
@@ -343,21 +382,17 @@ namespace Files.App.ViewModels
 
 		private async void ExecuteReviewAppCommand()
 		{
-			UserSettingsService.ApplicationSettingsService.HasClickedReviewPrompt = true;
 			OnPropertyChanged(nameof(ShowReviewPrompt));
 
 			try
 			{
 				var storeContext = StoreContext.GetDefault();
 				InitializeWithWindow.Initialize(storeContext, MainWindow.Instance.WindowHandle);
-				await storeContext.RequestRateAndReviewAppAsync();
+				var result = await storeContext.RequestRateAndReviewAppAsync();
+				if (result.Status is StoreRateAndReviewStatus.Succeeded)
+					UserSettingsService.ApplicationSettingsService.HasClickedReviewPrompt = true;
 			}
 			catch (Exception) { }
-		}
-
-		private void ExecuteDismissReviewPromptCommand()
-		{
-			UserSettingsService.ApplicationSettingsService.HasClickedReviewPrompt = true;
 		}
 
 		private async void ExecuteSponsorCommand()
@@ -365,11 +400,6 @@ namespace Files.App.ViewModels
 			UserSettingsService.ApplicationSettingsService.HasClickedSponsorPrompt = true;
 			OnPropertyChanged(nameof(ShowSponsorPrompt));
 			await Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.SupportUsUrl)).AsTask();
-		}
-
-		private void ExecuteDismissSponsorPromptCommand()
-		{
-			UserSettingsService.ApplicationSettingsService.HasClickedSponsorPrompt = true;
 		}
 
 		private async Task ExecuteOpenNetworkSharingSettingsCommand()

@@ -14,6 +14,9 @@ using Microsoft.UI.Xaml.Input;
 using System.IO;
 using System.Windows.Input;
 using Windows.ApplicationModel.DataTransfer;
+using WinRT;
+using Windows.Win32;
+using Windows.Win32.Storage.FileSystem;
 
 namespace Files.App.ViewModels.UserControls
 {
@@ -79,7 +82,11 @@ namespace Files.App.ViewModels.UserControls
 
 		public bool ShowShelfPaneToggleButton => AppearanceSettingsService.ShowShelfPaneToggleButton && AppLifecycleHelper.AppEnvironment is AppEnvironment.Dev;
 
-		private NavigationToolbar? AddressToolbar => (MainWindow.Instance.Content as Frame)?.FindDescendant<NavigationToolbar>();
+		private NavigationToolbar? AddressToolbar
+		{
+			[DynamicWindowsRuntimeCast(typeof(Frame))]
+			get => (MainWindow.Instance.Content as Frame)?.FindDescendant<NavigationToolbar>();
+		}
 
 		public bool HasAdditionalAction =>
 			InstanceViewModel.IsPageTypeRecycleBin ||
@@ -366,6 +373,7 @@ namespace Files.App.ViewModels.UserControls
 		}
 
 		[Obsolete("Superseded by Omnibar.")]
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		public void PathBoxItem_DragLeave(object sender, DragEventArgs e)
 		{
 			if (((FrameworkElement)sender).DataContext is not PathBoxItem pathBoxItem ||
@@ -382,6 +390,7 @@ namespace Files.App.ViewModels.UserControls
 		}
 
 		[Obsolete("Superseded by Omnibar.")]
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		public async Task PathBoxItem_Drop(object sender, DragEventArgs e)
 		{
 			if (_lockFlag)
@@ -421,6 +430,7 @@ namespace Files.App.ViewModels.UserControls
 		}
 
 		[Obsolete("Superseded by Omnibar.")]
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		public async Task PathBoxItem_DragOver(object sender, DragEventArgs e)
 		{
 			if (IsSingleItemOverride ||
@@ -473,7 +483,8 @@ namespace Files.App.ViewModels.UserControls
 
 			var storageItems = await FilesystemHelpers.GetDraggedStorageItems(e.DataView);
 
-			if (!storageItems.Any(storageItem =>
+			if (storageItems.ContainsDestinationOrAncestor(pathBoxItem.Path) ||
+				!storageItems.Any(storageItem =>
 					!string.IsNullOrEmpty(storageItem?.Path) &&
 					storageItem.Path.Replace(pathBoxItem.Path, string.Empty, StringComparison.Ordinal)
 						.Trim(Path.DirectorySeparatorChar)
@@ -503,6 +514,7 @@ namespace Files.App.ViewModels.UserControls
 		}
 
 		[Obsolete("Superseded by Omnibar.")]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
 		public void CurrentPathSetTextBox_TextChanged(object sender, TextChangedEventArgs args)
 		{
 			if (sender is TextBox textBox)
@@ -529,11 +541,11 @@ namespace Files.App.ViewModels.UserControls
 			ToolbarPathItemInvoked?.Invoke(this, new() { ItemPath = path });
 		}
 
-		public async Task HandleItemNavigationAsync(string path)
+		public async Task<bool> HandleItemNavigationAsync(string path)
 		{
 			var shellPage = ContentPageContext.ShellPage;
 			if (shellPage is null)
-				return;
+				return true;
 
 			var shellViewModel = shellPage.ShellViewModel
 				?? throw new InvalidOperationException("The current shell page does not have a view model.");
@@ -543,12 +555,12 @@ namespace Files.App.ViewModels.UserControls
 			var normalizedInput = NormalizePathInput(path, isFtp);
 			if (currentPath is not null && currentPath.Equals(normalizedInput, StringComparison.OrdinalIgnoreCase) ||
 				string.IsNullOrWhiteSpace(normalizedInput))
-				return;
+				return true;
 
 			if (normalizedInput.Equals(shellViewModel.WorkingDirectory) &&
 				shellPage.CurrentPageType != typeof(HomePage) &&
 				!shellViewModel.IsSearchResults)
-				return;
+				return true;
 
 			if (normalizedInput.Equals("Home", StringComparison.OrdinalIgnoreCase) ||
 				normalizedInput.Equals(Strings.Home.GetLocalizedResource(), StringComparison.OrdinalIgnoreCase))
@@ -572,7 +584,7 @@ namespace Files.App.ViewModels.UserControls
 			{
 				normalizedInput = StorageFileExtensions.GetResolvedPath(normalizedInput, isFtp);
 				if (currentPath is not null && currentPath.Equals(normalizedInput, StringComparison.OrdinalIgnoreCase))
-					return;
+					return true;
 
 				var item = await FilesystemTasks.Wrap(() => DriveHelpers.GetRootFromPathAsync(normalizedInput));
 
@@ -591,7 +603,7 @@ namespace Files.App.ViewModels.UserControls
 						bool ejectButton = await DialogDisplayHelper.ShowDialogAsync(Strings.InsertDiscDialogTitle.GetLocalizedResource(), string.Format(Strings.InsertDiscDialogText.GetLocalizedResource(), drivePath), Strings.InsertDiscDialog_OpenDriveButton.GetLocalizedResource(), Strings.Close.GetLocalizedResource());
 						if (ejectButton)
 							DriveHelpers.EjectDeviceAsync(drivePath);
-						return;
+						return true;
 					}
 
 					var pathToNavigate = resFolder.Result?.Path ?? normalizedInput;
@@ -629,18 +641,22 @@ namespace Files.App.ViewModels.UserControls
 							?? throw new InvalidOperationException("The navigation path has not been initialized.");
 
 						if (await LaunchApplicationFromPath(pathText, workingDir))
-							return;
+							return true;
 
+						var isValid = false;
 						try
 						{
-							if (!await Windows.System.Launcher.LaunchUriAsync(new Uri(pathText)))
-								await DialogDisplayHelper.ShowDialogAsync(Strings.InvalidItemDialogTitle.GetLocalizedResource(),
-									string.Format(Strings.InvalidItemDialogContent.GetLocalizedResource(), Environment.NewLine, resFolder.ErrorCode.ToString()));
+							isValid = await Windows.System.Launcher.LaunchUriAsync(new Uri(pathText));
 						}
 						catch (Exception ex) when (ex is UriFormatException || ex is ArgumentException)
 						{
+						}
+
+						if (!isValid)
+						{
 							await DialogDisplayHelper.ShowDialogAsync(Strings.InvalidItemDialogTitle.GetLocalizedResource(),
 								string.Format(Strings.InvalidItemDialogContent.GetLocalizedResource(), Environment.NewLine, resFolder.ErrorCode.ToString()));
+							return false;
 						}
 					}
 				}
@@ -651,6 +667,7 @@ namespace Files.App.ViewModels.UserControls
 			shellViewModel = shellPage.ShellViewModel
 				?? throw new InvalidOperationException("The current shell page does not have a view model.");
 			PathControlDisplayText = shellViewModel.WorkingDirectory;
+			return true;
 		}
 
 		public void SwitchToCommandPaletteMode()
@@ -759,17 +776,17 @@ namespace Files.App.ViewModels.UserControls
 		/// Enumerates subfolders using Win32 API, including hidden folders based on user settings.
 		/// Returns null if the path cannot be enumerated with Win32.
 		/// </summary>
-		private List<(string Name, string Path, bool IsHidden)>? GetSubfolders(string parentPath)
+		private unsafe List<(string Name, string Path, bool IsHidden)>? GetSubfolders(string parentPath)
 		{
-			IntPtr hFile = Win32PInvoke.FindFirstFileExFromApp(
+			WIN32_FIND_DATAW findData = default;
+			using FindCloseSafeHandle hFile = PInvoke.FindFirstFileEx(
 				$"{parentPath}{Path.DirectorySeparatorChar}*.*",
-				Win32PInvoke.FINDEX_INFO_LEVELS.FindExInfoBasic,
-				out Win32PInvoke.WIN32_FIND_DATA findData,
-				Win32PInvoke.FINDEX_SEARCH_OPS.FindExSearchNameMatch,
-				IntPtr.Zero,
-				Win32PInvoke.FIND_FIRST_EX_LARGE_FETCH);
+				FINDEX_INFO_LEVELS.FindExInfoBasic,
+				&findData,
+				FINDEX_SEARCH_OPS.FindExSearchNameMatch,
+				FIND_FIRST_EX_FLAGS.FIND_FIRST_EX_LARGE_FETCH);
 
-			if (hFile.ToInt64() == -1)
+			if (hFile.IsInvalid)
 				return null;
 
 			var showHidden = UserSettingsService.FoldersSettingsService.ShowHiddenItems;
@@ -779,10 +796,11 @@ namespace Files.App.ViewModels.UserControls
 
 			do
 			{
-				if (findData.cFileName is "." or "..")
+				if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) == 0)
 					continue;
 
-				if (((FileAttributes)findData.dwFileAttributes & FileAttributes.Directory) == 0)
+				string fileName = findData.cFileName.ToString();
+				if (fileName is "." or "..")
 					continue;
 
 				bool isHidden = ((FileAttributes)findData.dwFileAttributes & FileAttributes.Hidden) != 0;
@@ -791,15 +809,15 @@ namespace Files.App.ViewModels.UserControls
 				if (isHidden && (!showHidden || (isSystem && !showSystem)))
 					continue;
 
-				if (findData.cFileName.StartsWith('.') && !showDot)
+				if (fileName.StartsWith('.') && !showDot)
 					continue;
 
-				folders.Add((findData.cFileName, Path.Combine(parentPath, findData.cFileName), isHidden));
+				folders.Add((fileName, Path.Combine(parentPath, fileName), isHidden));
 			}
-			while (Win32PInvoke.FindNextFile(hFile, out findData));
+			while (PInvoke.FindNextFile(hFile, out findData));
 
-			Win32PInvoke.FindClose(hFile);
-			folders.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+			var naturalComparer = NaturalStringComparer.GetForProcessor();
+			folders.Sort((a, b) => naturalComparer.Compare(a.Name, b.Name));
 
 			return folders;
 		}

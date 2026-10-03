@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System.IO;
 using Windows.Win32.UI.WindowsAndMessaging;
+using WinRT;
 using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
 using DispatcherQueueTimer = Microsoft.UI.Dispatching.DispatcherQueueTimer;
 using FlyoutPlacementMode = Microsoft.UI.Xaml.Controls.Primitives.FlyoutPlacementMode;
@@ -45,6 +46,7 @@ namespace Files.App.UserControls
 
 		private void Toolbar_Loaded(object sender, RoutedEventArgs e)
 		{
+			App.AppModel.PropertyChanged += AppModel_PropertyChanged;
 			foreach (var cmd in Commands) cmd.PropertyChanged += Command_PropertyChanged;
 			RequestToolbarRefresh(true);
 			UserSettingsService.AppearanceSettingsService.PropertyChanged += AppearanceSettings_PropertyChanged;
@@ -52,12 +54,25 @@ namespace Files.App.UserControls
 
 		private void Toolbar_Unloaded(object sender, RoutedEventArgs e)
 		{
+			toolbarRefreshTimer.Stop();
+			App.AppModel.PropertyChanged -= AppModel_PropertyChanged;
 			foreach (var cmd in Commands) cmd.PropertyChanged -= Command_PropertyChanged;
 			DetachToggleButtons();
 			UserSettingsService.AppearanceSettingsService.PropertyChanged -= AppearanceSettings_PropertyChanged;
 			if (editTagsMenu is not null)
 				editTagsMenu.TagsChanged -= EditTagsMenu_TagsChanged;
 			openWithMenu?.Dispose();
+		}
+
+		private void AppModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName != nameof(AppModel.IsMainWindowClosed))
+				return;
+
+			if (App.AppModel.IsMainWindowClosed)
+				toolbarRefreshTimer.Stop();
+			else
+				RequestToolbarRefresh(true);
 		}
 
 		partial void OnViewModelChanged(NavigationToolbarViewModel? newValue)
@@ -110,15 +125,20 @@ namespace Files.App.UserControls
 
 		private void RequestToolbarRefresh(bool ignoreDebounce)
 		{
+			if (App.AppModel.IsMainWindowClosed || !IsLoaded)
+				return;
+
 			toolbarRefreshTimer.Debounce(PopulateToolbarItems, TimeSpan.FromMilliseconds(100), ignoreDebounce);
 		}
 
 		private void ContextCommandBar_Loaded(object sender, RoutedEventArgs e)
 			=> RequestToolbarRefresh(true);
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(AppBarSeparator))]
 		private void PopulateToolbarItems()
 		{
-			if (ContextCommandBar is null)
+			if (App.AppModel.IsMainWindowClosed || !IsLoaded || ContextCommandBar is null)
 				return;
 
 			DetachToggleButtons();
@@ -170,6 +190,7 @@ namespace Files.App.UserControls
 				? !active.Any(c => c is not ToolbarDefaultsTemplate.AlwaysVisibleContextId and not ToolbarDefaultsTemplate.OtherContextsContextId)
 				: active.Contains(contextId);
 
+		[DynamicWindowsRuntimeCast(typeof(Style))]
 		private ICommandBarElement? CreateToolbarElement(ToolbarItemSettingsEntry entry)
 		{
 			if (!string.IsNullOrEmpty(entry.CommandCode) && ToolbarItemDescriptor.IsSeparatorCode(entry.CommandCode))
@@ -329,6 +350,7 @@ namespace Files.App.UserControls
 			return button;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(AppBarToggleButton))]
 		private AppBarToggleButton CreateToggleButton(IRichCommand cmd, bool showIcon, bool showLabel)
 		{
 			var button = new AppBarToggleButton
@@ -407,6 +429,8 @@ namespace Files.App.UserControls
 			button.Icon = glyph.ToFontIcon() ?? glyph.ToOverflowIcon();
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(Viewbox))]
 		internal static void CollapseIconViewbox(object sender, RoutedEventArgs e)
 		{
 			var button = (FrameworkElement)sender;
@@ -416,6 +440,7 @@ namespace Files.App.UserControls
 				vb.Visibility = Visibility.Collapsed;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(AppBarSeparator))]
 		internal static void UpdateCommandBarSeparatorVisibility(IList<ICommandBarElement> commands)
 		{
 			bool prevSep = true;
@@ -593,6 +618,8 @@ namespace Files.App.UserControls
 			return item;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(MenuFlyoutSubItem))]
+		[DynamicWindowsRuntimeCast(typeof(MenuFlyoutSeparator))]
 		private void SortGroup_AccessKeyInvoked(UIElement sender, AccessKeyInvokedEventArgs args)
 		{
 			if (sender is not MenuFlyoutSubItem menu) return;

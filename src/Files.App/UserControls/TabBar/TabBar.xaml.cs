@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Shapes;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Win32;
+using WinRT;
 
 namespace Files.App.UserControls.TabBar
 {
@@ -26,6 +27,12 @@ namespace Files.App.UserControls.TabBar
 		private readonly DispatcherTimer tabHoverTimer = new();
 
 		private TabViewItem? hoveredTabViewItem;
+
+		// Tab that currently shows the drop indicator
+		private TabViewItem? dropTargetTabViewItem;
+
+		// Used to discard drag over results that resolved after the pointer already left the tab
+		private int dragOverRevision;
 
 		private bool _lockDropOperation = false;
 
@@ -109,6 +116,9 @@ namespace Files.App.UserControls.TabBar
 			if (sender is not TabViewItem { DataContext: TabBarItem { TabItemContent: { } tabContent } })
 				return;
 
+			dragOverRevision++;
+			SetDropTargetTabViewItem(null);
+
 			await tabContent.TabItemDrop(sender, e);
 			HorizontalTabView.CanReorderTabs = true;
 			tabHoverTimer.Stop();
@@ -119,19 +129,42 @@ namespace Files.App.UserControls.TabBar
 			if (sender is not TabViewItem { DataContext: TabBarItem { TabItemContent: { } tabContent } } tabViewItem)
 				return;
 
+			var revision = ++dragOverRevision;
+
 			await tabContent.TabItemDragOver(sender, e);
+
+			if (revision != dragOverRevision)
+				return;
+
 			if (e.AcceptedOperation != DataPackageOperation.None)
 			{
 				HorizontalTabView.CanReorderTabs = false;
 				tabHoverTimer.Start();
 				hoveredTabViewItem = tabViewItem;
+				SetDropTargetTabViewItem(tabViewItem);
 			}
 		}
 
 		private void TabViewItem_DragLeave(object sender, DragEventArgs e)
 		{
+			dragOverRevision++;
 			tabHoverTimer.Stop();
 			hoveredTabViewItem = null;
+			SetDropTargetTabViewItem(null);
+		}
+
+		private void SetDropTargetTabViewItem(TabViewItem? tabViewItem)
+		{
+			if (dropTargetTabViewItem == tabViewItem)
+				return;
+
+			if (dropTargetTabViewItem is not null)
+				VisualStateManager.GoToState(dropTargetTabViewItem, "NoStorageItemDragOver", true);
+
+			dropTargetTabViewItem = tabViewItem;
+
+			if (tabViewItem is not null)
+				VisualStateManager.GoToState(tabViewItem, "StorageItemDragOver", true);
 		}
 
 		// Select tab that is hovered over for a certain duration
@@ -193,8 +226,12 @@ namespace Files.App.UserControls.TabBar
 		private void TabView_DragLeave(object sender, DragEventArgs e)
 		{
 			HorizontalTabView.CanReorderTabs = WindowContext.CanDragAndDrop;
+			dragOverRevision++;
+			SetDropTargetTabViewItem(null);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(TabView))]
+		[DynamicWindowsRuntimeCast(typeof(TabViewItem))]
 		private async void TabView_TabStripDrop(object sender, DragEventArgs e)
 		{
 			HorizontalTabView.CanReorderTabs = WindowContext.CanDragAndDrop;
@@ -303,6 +340,7 @@ namespace Files.App.UserControls.TabBar
 			e.Handled = true;
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(MenuFlyout))]
 		private void TabItemContextMenu_Opening(object sender, object e)
 		{
 			MenuItemMoveTabToNewWindow.IsEnabled = Items.Count > 1;
@@ -373,6 +411,8 @@ namespace Files.App.UserControls.TabBar
 			return HorizontalTabView.ContainerFromItem(item);
 		}
 
+		[DynamicWindowsRuntimeCast(typeof(TabViewItem))]
+		[DynamicWindowsRuntimeCast(typeof(ContentControl))]
 		private void TabViewItem_Loaded(object sender, RoutedEventArgs e)
 		{
 			if (sender is TabViewItem tvi && tvi.FindDescendant("IconControl") is ContentControl control)

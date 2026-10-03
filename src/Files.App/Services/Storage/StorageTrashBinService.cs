@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 #pragma warning disable CS0612 // RecycleBinWatcher obsolete; migrate when replacement is available
 
+using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -100,12 +101,35 @@ namespace Files.App.Services
 		/// <inheritdoc/>
 		public bool EmptyTrashBin()
 		{
+			IShellView? recycleBinView = null;
+			try
+			{
+				PInvoke.SHGetKnownFolderItem(FOLDERID.FOLDERID_RecycleBinFolder, KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT, null, out IShellItem recycleBinFolder).ThrowOnFailure();
+				recycleBinFolder.BindToHandler(null, PInvoke.BHID_SFViewObject, out recycleBinView).ThrowOnFailure();
+			}
+			catch (Exception ex)
+			{
+				App.Logger.LogWarning(ex, "Failed to create the Recycle Bin shell view.");
+			}
+
 			// TODO: Use IFileOperation instead of its wrapper for the operation status to be reported.
 			var fRes = PInvoke.SHEmptyRecycleBin(
 				new(),
 				string.Empty,
 				0x00000001 | 0x00000002 /* SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI */)
 			.Succeeded;
+
+			if (fRes)
+			{
+				PInvoke.SHUpdateRecycleBinIcon();
+
+				if (recycleBinView is not null)
+				{
+					HRESULT hr = recycleBinView.Refresh();
+					if (hr.Failed)
+						App.Logger.LogWarning("Failed to refresh the Recycle Bin shell view. HRESULT: 0x{HResult:X8}", hr.Value);
+				}
+			}
 
 			return fRes;
 		}

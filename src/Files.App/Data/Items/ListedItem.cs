@@ -67,13 +67,6 @@ namespace Files.App.Utils
 
 		public bool ContainsFilesOrFolders { get; set; } = true;
 
-		private bool needsPlaceholderGlyph = true;
-		public bool NeedsPlaceholderGlyph
-		{
-			get => needsPlaceholderGlyph;
-			set => SetProperty(ref needsPlaceholderGlyph, value);
-		}
-
 		private bool loadFileIcon;
 		public bool LoadFileIcon
 		{
@@ -120,7 +113,7 @@ namespace Files.App.Utils
 						var path = this.GetRequiredPath();
 						var dbInstance = FileTagsHelper.GetDbInstance();
 						dbInstance.SetTags(path, FileFRN, value);
-						FileTagsHelper.WriteFileTag(path, value);
+						_ = FileTagsHelper.WriteFileTagAsync(path, value);
 					}
 
 					HasTags = !value.IsEmpty();
@@ -183,14 +176,8 @@ namespace Files.App.Utils
 			get => fileImage;
 			set
 			{
-				if (SetProperty(ref fileImage, value))
-				{
-					if (value is BitmapImage)
-					{
-						LoadFileIcon = true;
-						NeedsPlaceholderGlyph = false;
-					}
-				}
+				if (SetProperty(ref fileImage, value) && value is BitmapImage)
+					LoadFileIcon = true;
 			}
 		}
 

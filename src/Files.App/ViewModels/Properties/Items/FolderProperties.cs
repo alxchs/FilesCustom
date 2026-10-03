@@ -81,7 +81,7 @@ namespace Files.App.ViewModels.Properties
 				itemPath,
 				Constants.ShellIconSizes.ExtraLarge,
 				true,
-				IconOptions.UseCurrentScale);
+				IconOptions.None);
 
 			if (result is not null)
 			{
@@ -168,7 +168,7 @@ namespace Files.App.ViewModels.Properties
 			if (string.IsNullOrEmpty(folderPath))
 			{
 				// In MTP devices calculating folder size would be too slow
-				// Also should use StorageFolder methods instead of FindFirstFileExFromApp
+				// Also should use StorageFolder methods instead of FindFirstFileEx
 				return;
 			}
 
