@@ -12,7 +12,7 @@ DO NOT CHANGE  Nenhum código de produto em src/ e tests/ além do necessário p
 OWNER          AGY (tarefa G0)
 CURRENT BRANCH main (base: upstream/main 0e3c17ca4, D-008)
 LAST DECISION  D-001..D-008 em DECISIONS.md (D-008, 03/10/2026: base migrada para upstream/main)
-NEXT ACTION    1) F007-A (medição, sem código)  2) Smoke test §16  3) Decidir reverter WindowsAppSdkBootstrapperAutoInitialize  4) Brief da F001 e exploração OneCommander
+NEXT ACTION    1) AGY: F007-A + G0-smoke-test (briefs em docs/agents/tasks/)  2) AGY: OC-rename-exploration  3) Claude: aprovar F001-rename-ux depois do rename.md  4) Decidir reverter WindowsAppSdkBootstrapperAutoInitialize
 BLOCKER        Nenhum
 LAST UPDATE    2026-10-03 — Claude (D-008: base agora é upstream/main 0e3c17ca4; refazer baseline/medições nesta base)
 ```
