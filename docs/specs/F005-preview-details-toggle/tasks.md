@@ -1,6 +1,6 @@
 # F005 — Preview e Details com acesso imediato — TASKS
 
-Status: **APROVADAS** (Claude, 04/10/2026). Executor: AGY. Branch: `feature/preview-details-shortcuts` (a partir de `main`; a F001 fica na própria branch). Uma tarefa por commit.
+Status: **APROVADAS** (Claude, 04/10/2026). Executor: AGY. Branch: `feature/preview-details-shortcuts`, criada a partir do HEAD de `feature/rename-ux` (a `main` publicada ainda não tem as correções da F001 e o exe de teste precisa delas; registre isso no handoff). Uma tarefa por commit.
 
 | # | Tarefa | Atende | Pronto quando | Estado |
 |---|---|---|---|---|
