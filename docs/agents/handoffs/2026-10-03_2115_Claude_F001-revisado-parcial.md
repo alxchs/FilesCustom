@@ -27,4 +27,4 @@ Em `docs/agents/evidence/f001/` (Details, `C:\FilesUXLab`):
 
 1. Alexandre testa no app aberto (build `5e35e6a6f`, pacote `FilesDev` 4.2.37.0): F2 em `arquivo.txt`, `.gitignore`, `arquivo.tar.gz`; `End`+`Backspace`; `Tab`; clique na extensão; os três layouts.
 2. AGY (quando houver cota/credencial): validar Grid e Column com captura, clique na extensão, teste em `tests/Files.App.UnitTests`; **consolidar** os ~30 scripts soltos em `tools/perf/` (hoje sem commit, de teste exploratório) em poucos scripts versionados.
-3. Credencial da AGY no CLI: o último disparo caiu em 401, não em 429; pode ser troca de perfil no meio da execução. Verificar `trocarConta list` e o login antes de redisparar.
+3. Credencial da AGY: o Alexandre trocou manualmente para uma conta autorizada com cota no meio da tarde (por isso a AGY trabalhou 2h23; o `--print` segue o perfil ativo, CONFIRMED pelo contraste 429 as 18:56 / trabalho a partir das 19:04). A causa do 401 as 21:03 e desconhecida (INFERRED: sessao ou token da conta expirou; nao verificado). Antes de redisparar, conferir o login do perfil ativo no Antigravity.
