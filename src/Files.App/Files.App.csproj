@@ -38,6 +38,10 @@
         <PublishReadyToRunComposite Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRunComposite>
         <ApplicationIcon>Assets\AppTiles\Dev\Logo.ico</ApplicationIcon>
         <TieredPGO>true</TieredPGO>
+        <TieredCompilation>true</TieredCompilation>
+        <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+        <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
+        <GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
         <ServerGarbageCollection>false</ServerGarbageCollection>
         <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
         <IsTrimmable>true</IsTrimmable>

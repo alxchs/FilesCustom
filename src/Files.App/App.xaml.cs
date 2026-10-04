@@ -197,8 +197,6 @@ namespace Files.App
 				{
 					if (SplashScreenLoadingTCS is not null)
 					{
-						// Wait for the UI to update
-						await SplashScreenLoadingTCS.Task.WithTimeoutAsync(TimeSpan.FromMilliseconds(500));
 						SplashScreenLoadingTCS = null;
 					}
 
