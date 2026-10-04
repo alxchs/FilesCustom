@@ -1,6 +1,6 @@
 # F005 — Preview e Details com acesso imediato
 
-Status: BRIEF APROVADO (Claude, 03/10/2026, a partir de análise do código). Executor: AGY. Branch: `feature/preview-details-shortcuts`.
+Status: **SUBSTITUÍDO pelo conjunto SDD `docs/specs/F005-preview-details-toggle/` (spec, plan, tasks; Claude, 04/10/2026).** Este brief fica como histórico; a AGY executa `tasks.md`. Branch: `feature/preview-details-shortcuts`.
 
 ## ARQUITETURA ATUAL (lida no código em 03/10/2026; nada executado, tudo NOT TESTED)
 

@@ -85,3 +85,12 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
   6. `Tab` seleciona a extensao sem o ponto inicial para agilizar a substituicao direta.
 - **Consequences:** `mkfile release src\Files.App\Files.App.csproj` resulta em 0 Warning(s) e 0 Error(s). Todos os 20 casos de teste passam com sucesso.
 
+
+
+## D-012 — Spec-Driven Development (SDD) passa a ser a metodologia de features (04/10/2026)
+
+- **Context:** o Alexandre pediu "specs para metodologia SDD" a partir de agora (interpretado como Spec-Driven Development; o pedido veio escrito "ssd"). Até aqui cada feature tinha um brief único (TASK/ACCEPTANCE/ARQUIVOS) e o `MASTER_SPEC.md` como spec-mãe.
+- **Decision:** `METODO.md` §6 reescrito: por feature, `docs/specs/<ID>-<nome>/` com `spec.md` (o quê e por quê, cenários `AC-n`, requisitos `FR-n`), `plan.md` (como) e `tasks.md` (o que a AGY executa); portões spec, plan, tasks, código; rastreabilidade por `AC-n` no handoff e na nota de liberação. Modelos em `~/.dev-method/templates/`, `Novo-Projeto.ps1` cria `docs/specs`. Primeira feature: F005.
+- **Reason:** o brief misturava comportamento e implementação, e a verificação ficava sem critério numerado; a F001 mostrou o custo (defeitos de comportamento só achados na revisão).
+- **Trade-offs:** mais três arquivos por feature e um portão a mais. Mitigação: specs curtas, briefs de exploração e medição continuam como estão, e features já aprovadas (F001) terminam pelo brief.
+- **Consequences:** a AGY não implementa sem `tasks.md` aprovado. Descoberta no caminho: o projeto `tests/Files.App.UnitTests` citado nos briefs **não existe** (CONFIRMED por `git ls-files`), então teste unitário exige script `pwsh` ou projeto novo; decisão fica na T2 da F005.

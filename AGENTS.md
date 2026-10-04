@@ -133,7 +133,7 @@ Este checkout é o **Files Custom**, derivado do Files Community. Além das dire
 
 - Leia `C:\Users\alxch\.dev-method\METODO.md` (metodologia geral do Alexandre, comum a todos os projetos), `MASTER_SPEC.md` (seções da tarefa), `AGENT_CONTEXT.md` (estado atual), `docs/agents/PLAYBOOK.md` (fila e pré-aprovações para seguir sem o Claude) e `docs/agents/CONTINUITY.md` (específico deste projeto) antes de agir.
 - Nenhuma feature (F001+) antes do gate G0: baseline oficial compilado, aberto e com smoke test registrado em `STATUS.md`.
-- Sem task brief em `docs/agents/tasks/`, não comece feature. Melhoria fora do escopo vira `DISCOVERY`, não código.
+- **SDD (METODO §6):** feature nova nasce de `docs/specs/<ID>-<nome>/` (`spec.md`, `plan.md`, `tasks.md`), nessa ordem e com cada etapa aprovada; sem `tasks.md` aprovado não comece feature. Briefs em `docs/agents/tasks/` valem só para exploração, medição e features antigas já aprovadas. Melhoria fora do escopo vira `DISCOVERY`, não código.
 - Declare `NOT TESTED`, `OBSERVED`, `INFERRED` ou `CONFIRMED`; nunca invente resultado.
 - Commit local a cada passo verde; ao parar, escreva handoff em `docs/agents/handoffs/`. `git push` só com confirmação do Alexandre.
 - Mantenha o diff pequeno e isolado em arquivos próprios para acompanhar o upstream (`MASTER_SPEC.md` §13).

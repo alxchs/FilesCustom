@@ -20,7 +20,7 @@ Em `docs/agents/evidence/f001/` (Details, `C:\FilesUXLab`):
 - Layouts **Grid e Column**: nenhuma captura útil (os scripts `test_grid_*`/`run_all_layouts_unified` rodaram, sem evidência conferida).
 - Clique do mouse **dentro da extensão** (captura `09` mostra só o cursor ao lado do ponto; não prova o destravamento).
 - `Tab`/`Shift+Tab`, `Ctrl+A`, pasta (`11`), `.lnk` (`12`), commit (`13`) e desfazer (`14`): capturas existem, o Claude **não as abriu**.
-- Falta o teste unitário em `tests/Files.App.UnitTests` (só existe o `.ps1`).
+- Falta teste unitário: o projeto `tests/Files.App.UnitTests` citado nos briefs **não existe** no repositório (só `Files.App.UITests`, `Files.InteractionTests` e o `.ps1`); decidir script `pwsh` ou projeto novo (ver F005 plan).
 - Decisões novas da AGY (D-011) ainda sem o OK do Claude: `Tab` seleciona a extensão sem o ponto; `.env.local` → nome `.env`, extensão `.local`.
 
 ## Pendências

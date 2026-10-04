@@ -16,7 +16,7 @@ Escrito pelo Claude em 03/10/2026. Metodologia geral: `C:\Users\alxch\.dev-metho
 Feito: F007-A, G0 (smoke), OC-rename (exploração). Em andamento: **F001**.
 
 1. **F001 Rename UX** — `docs/agents/tasks/F001-rename-ux.md` (aprovado, opção A). Termine com testes, handoff e commit na `feature/rename-ux`.
-2. **F005** — `F005-preview-details-toggle.md` (implementar). Em seguida **F003** — `F003-new-vs-duplicate-tab.md` (só confirmar e registrar).
+2. **F005** — SDD: `docs/specs/F005-preview-details-toggle/` (executar `tasks.md`; o brief antigo é só histórico). Em seguida **F003** — `F003-new-vs-duplicate-tab.md` (só confirmar e registrar).
 3. **F008 Modo compacto** — `F008-compact-density.md` (análise, depois implementação). Depois **F009 Fontes separadas** — `F009-separate-fonts.md`.
 4. **F002 Colunas** — `F002-independent-column-resize.md` (investigação por teste, sem código). Depois **F010 Todas as colunas do Explorer** — `F010-all-explorer-columns.md` (fase 1: investigação; **para no gate do Claude**).
 5. **F004 Menu clássico** — `F004-classic-menu-bar.md` (análise + protótipo; para no gate).
@@ -30,7 +30,7 @@ Se a fila acabar: `DISCOVERY` em `STATUS.md`, handoff, `AGENT_CONTEXT.md` atuali
 
 - **F001:** opção A do brief (manter o TextBox único e blindar a extensão: nome selecionável, extensão travada até gesto deliberado, regras para dotfile e extensão dupla). Só passe para a opção B (dois campos) se o `rename.md` mostrar que A não resolve a queixa original. Marque o brief como `APROVADO (pré-aprovação do PLAYBOOK)` antes de codar. Branch `feature/rename-ux`.
 - **F003:** brief aprovado `docs/agents/tasks/F003-new-vs-duplicate-tab.md`. A análise do Claude mostrou que o Files já separa Ctrl+T (Home) de Duplicar (Ctrl+Shift+K): a tarefa é confirmar no app e registrar; **não** criar a opção New Tab Behavior (DISCOVERY, IMPLEMENT LATER).
-- **F005:** brief aprovado `docs/agents/tasks/F005-preview-details-toggle.md` (Toggle Preview/Details de um passo, Alt+P / Alt+Shift+P, no Command Palette; edição só em `Actions/Show/`). Branch `feature/preview-details-shortcuts`.
+- **F005:** spec, plan e tasks aprovados em `docs/specs/F005-preview-details-toggle/` (04/10/2026; brief antigo em `docs/agents/tasks/`, só histórico) (Toggle Preview/Details de um passo, Alt+P / Alt+Shift+P, no Command Palette; edição só em `Actions/Show/`). Branch `feature/preview-details-shortcuts`.
 - **F007:** se o A/B mostrar que o fundo (Mica Alt) explica a CPU do compositor, **proponha** a correção mínima no brief; implementar só com aprovação do Claude. Se não explicar, abra novo `DISCOVERY` com o próximo suspeito e meça-o.
 - Nomes de arquivos novos: em arquivos próprios, comentários mínimos, strings via `Strings.resx` (localização), CRLF, `.editorconfig` do repo.
 - Warning novo em build de release: corrigir antes de seguir, supressão só escopada com motivo.
@@ -85,3 +85,7 @@ Pedido do Alexandre em 03/10/2026: **todo executável gerado e entregue para tes
 - Conteúdo mínimo: caminho do exe, commit e versão do pacote, resultado do build (`0 Warning(s)` / `0 Error(s)`), **o que foi liberado** (item por item, com estado CONFIRMED / OBSERVED / NOT TESTED), **como testar**, **o que ainda não está no exe** (lista das F00x) e pendências.
 - A nota descreve o exe que existe: só marque o que foi conferido, com o mesmo rigor do handoff. Sem exe novo, sem nota nova.
 - Quem não puder publicar (AGY): escreva só o `.md`; o Claude publica a página.
+
+## SDD (spec-driven) neste projeto
+
+Desde 04/10/2026 (METODO §6): feature nova = `docs/specs/<ID>-<nome>/` com `spec.md`, `plan.md` e `tasks.md`. Primeira: F005. Os briefs de F003, F008, F009 e F002/F010/F004/F006/F011 ainda são do formato antigo: **o Claude os converte em spec/plan/tasks antes de a AGY começar a implementar** (as fases de investigação e medição dos briefs podem seguir como estão). A AGY não implementa feature sem `tasks.md` aprovado; faltando, registre `PENDING DECISION` e siga com outra tarefa. O `MASTER_SPEC.md` é a spec-mãe: a spec da feature o detalha, nunca o contradiz.
