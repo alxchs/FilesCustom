@@ -8,6 +8,7 @@ namespace Files.App.Actions
 	{
 		private readonly InfoPaneViewModel infoPaneViewModel = Ioc.Default.GetRequiredService<InfoPaneViewModel>();
 		private readonly IInfoPaneSettingsService infoPaneSettingsService = Ioc.Default.GetRequiredService<IInfoPaneSettingsService>();
+		private readonly IContentPageContext contentPageContext = Ioc.Default.GetRequiredService<IContentPageContext>();
 
 		public string Label
 			=> Strings.ToggleDetailsPane.GetLocalizedResource();
@@ -49,6 +50,12 @@ namespace Files.App.Actions
 
 			infoPaneSettingsService.SelectedTab = selectedTab;
 			infoPaneViewModel.IsEnabled = isPaneOpen;
+
+			if (!isPaneOpen && contentPageContext.ShellPage is { } shellPage)
+			{
+				var paneHolder = shellPage.GetRequiredPaneHolder();
+				paneHolder.FocusActivePane();
+			}
 
 			return Task.CompletedTask;
 		}
