@@ -9,8 +9,8 @@ Status: **APROVADAS** (Claude, 04/10/2026). Executor: AGY. Branch: `feature/prev
 | T3 | Ajustar `TogglePreviewPaneAction` e `ToggleDetailsPaneAction`: usar a função, `IsExecutable => true`, `IsAccessibleGlobally => true`, `HotKey` | FR-001..FR-004 | `mkfile release` com 0 Warning(s) e 0 Error(s) | concluído |
 | T4 | Mostrar o atalho nos tooltips das abas (`InfoPane.xaml`); string nova só se faltar | FR-005, AC-11 | captura do tooltip | concluído |
 | T5 | Verificar foco ao fechar por atalho e `AutomationName`; corrigir só se faltar | FR-007, AC-9 | captura ou UI Automation mostrando o foco na lista | concluído |
-| T6 | Validar no app (`C:\FilesUXLab`): AC-1 a AC-11 nos 3 layouts, com imagem, texto, pasta e seleção vazia; reiniciar o app; regressão `Ctrl+Alt+I`, botão, abas | AC-1..AC-11 | capturas em `docs/agents/evidence/f005/` | pendente |
-| T7 | Handoff com o estado **por AC** (CONFIRMED, OBSERVED, NOT TESTED), `STATUS.md` e **nota de liberação** (`docs/releases/`, regra do PLAYBOOK) | todos | arquivos commitados, sem push | pendente |
+| T6 | Validar no app (`C:\FilesUXLab`): AC-1 a AC-11 nos 3 layouts, com imagem, texto, pasta e seleção vazia; reiniciar o app; regressão `Ctrl+Alt+I`, botão, abas | AC-1..AC-11 | capturas em `docs/agents/evidence/f005/` | concluído |
+| T7 | Handoff com o estado **por AC** (CONFIRMED, OBSERVED, NOT TESTED), `STATUS.md` e **nota de liberação** (`docs/releases/`, regra do PLAYBOOK) | todos | arquivos commitados, sem push | concluído |
 
 ## Teste obrigatório
 Um por `AC-n`, do tipo definido no `plan.md`. Feature só é "concluída" no gate de revisão do Claude ou do Alexandre.

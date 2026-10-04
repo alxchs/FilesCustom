@@ -20,13 +20,16 @@
 
 | ID | Feature | Estado | Branch |
 |---|---|---|---|
-| F001 | Rename UX | em andamento (OC-rename concluído, brief aprovado) | feature/rename-ux |
-
-| F003 | Nova aba vs duplicar | não iniciado | feature/new-vs-duplicate-tab |
-| F005 | Preview / Details | não iniciado | feature/preview-details-shortcuts |
-| F002 | Colunas | não iniciado | feature/independent-column-resize |
-| F004 | Menu clássico | não iniciado | feature/classic-menu |
-| F006 | Busca | não iniciado | feature/search-provider |
+| F001 | Rename UX | CONCLUÍDO (em teste / aguardando revisão) | feature/rename-ux |
+| F005 | Preview / Details | CONCLUÍDO (T1..T7 concluídos, unit tests 6/6, evidências em docs/agents/evidence/f005/) | feature/preview-details-shortcuts |
+| F003 | Nova aba vs duplicar | pronto para confirmação | feature/new-vs-duplicate-tab |
+| F008 | Modo compacto / Densidade OneCommander | iniciando SDD (spec.md, plan.md, tasks.md) | feature/compact-density |
+| F009 | Fontes separadas | na fila | feature/separate-fonts |
+| F002 | Colunas independentes | na fila | feature/independent-column-resize |
+| F010 | Todas as colunas do Explorer | na fila | feature/all-explorer-columns |
+| F004 | Menu clássico | na fila | feature/classic-menu |
+| F006 | Infraestrutura de busca | na fila | feature/search-provider |
+| F011 | Escolha de motor de busca (Everything) | na fila | feature/search-engine-choice |
 
 ## Observações do ambiente (28/09/2026)
 
