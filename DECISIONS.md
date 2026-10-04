@@ -94,3 +94,13 @@ Formato (MASTER_SPEC §37): Context, Problem, Options, Decision, Reason, Trade-o
 - **Reason:** o brief misturava comportamento e implementação, e a verificação ficava sem critério numerado; a F001 mostrou o custo (defeitos de comportamento só achados na revisão).
 - **Trade-offs:** mais três arquivos por feature e um portão a mais. Mitigação: specs curtas, briefs de exploração e medição continuam como estão, e features já aprovadas (F001) terminam pelo brief.
 - **Consequences:** a AGY não implementa sem `tasks.md` aprovado. Descoberta no caminho: o projeto `tests/Files.App.UnitTests` citado nos briefs **não existe** (CONFIRMED por `git ls-files`), então teste unitário exige script `pwsh` ou projeto novo; decisão fica na T2 da F005.
+
+## D-013 — Teste da função pura da F005 via script PowerShell (04/10/2026)
+
+- **Context:** a tarefa T2 da F005 exige teste automatizado dos 6 cenários de alternância (AC-1 a AC-6) e registro em DECISIONS.md da escolha entre script `pwsh` e projeto novo `tests/Files.Custom.Tests`.
+- **Problem:** o projeto de testes unitários não existe no repositório; criar projeto novo em `Files.slnx` introduz churn no build e risco de divergência com o upstream.
+- **Options:** (1) Criar um projeto `tests/Files.Custom.Tests.csproj` adicionando-o à solution; (2) Criar script `tests/test-pane-toggle-helper.ps1` que compila dinamicamente a função com `Add-Type` e valida os casos em milissegundos, replicando o padrão já aprovado de `tests/test-rename-helper.ps1`.
+- **Decision:** opção 2 (`tests/test-pane-toggle-helper.ps1`).
+- **Reason:** atende 100% ao critério de aceite com diff mínimo, sem tocar em arquivos de projeto (.csproj / .slnx), mantendo compatibilidade total com upstream e execução instantânea.
+- **Consequences:** os 6 casos AC-1..AC-6 são validados executando `pwsh -File tests/test-pane-toggle-helper.ps1` com 6/6 aprovados.
+
