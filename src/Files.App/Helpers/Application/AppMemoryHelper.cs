@@ -50,28 +50,6 @@ namespace Files.App.Helpers
 						await Task.Delay(500);
 
 					Collect();
-
-					// Finalizer chains release memory over several cycles; keep collecting while a pass still frees a meaningful amount
-					for (int pass = 0; pass < MaxSweepPasses; pass++)
-					{
-						await Task.Delay(SweepDelayMs);
-						if (Volatile.Read(ref trimRequested) == 1 ||
-							Environment.TickCount64 - Interlocked.Read(ref lastActivityTicks) < QuietWindowMs)
-							break;
-
-						var workingSetBefore = Environment.WorkingSet;
-						Collect();
-						if (workingSetBefore - Environment.WorkingSet < SweepContinueBytes)
-							break;
-					}
-
-					// Remaining idle pages move to the standby list so the process footprint shrinks immediately
-					if (Volatile.Read(ref trimRequested) == 0 &&
-						Environment.TickCount64 - Interlocked.Read(ref lastActivityTicks) >= QuietWindowMs)
-					{
-						using var process = Process.GetCurrentProcess();
-						PInvoke.K32EmptyWorkingSet(new Windows.Win32.Foundation.HANDLE(process.Handle));
-					}
 				}
 
 				Interlocked.Exchange(ref workerRunning, 0);
@@ -84,7 +62,7 @@ namespace Files.App.Helpers
 
 		private static void Collect()
 		{
-			// While the window is hidden (closing to background) the stop-the-world pause is invisible, so keep the aggressive compacting collection that returns the most memory; otherwise collect in the background so the UI thread isn't suspended
+			// When closing to background, perform a compacting collection; otherwise non-blocking optimized collection
 			if (App.AppModel?.IsMainWindowClosed ?? false)
 			{
 				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);

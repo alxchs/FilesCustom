@@ -474,8 +474,6 @@ namespace Files.App
 
 				if (cancellationToken.IsCancellationRequested)
 					return;
-
-				PInvoke.K32EmptyWorkingSet(processHandle);
 			}
 
 			new Thread(() =>

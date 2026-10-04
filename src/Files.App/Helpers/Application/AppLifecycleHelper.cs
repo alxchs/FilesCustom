@@ -120,20 +120,18 @@ namespace Files.App.Helpers
 				);
 
 				//Start the tasks separately to reduce resource contention
-				await Task.WhenAll(
-					addItemService.InitializeAsync(),
-					ContextMenu.WarmUpQueryContextMenuAsync()
-				);
-			});
+				await addItemService.InitializeAsync();
 
-			_ = Task.Run(FileTagsHelper.UpdateTagsDb);
-
-			_ = Task.Run(async () =>
-			{
-				// The follwing method invokes UI thread, so we run it in a separate task
-				await CheckAppUpdate();
-
-				await PeriodicallyCheckForUpdatesAsync();
+				// Defer heavy COM shell extension DLL warmup, tags DB migration and update checks
+				// so the main window is fully rendered and interactive without startup lockups.
+				_ = Task.Run(async () =>
+				{
+					await Task.Delay(3500);
+					await ContextMenu.WarmUpQueryContextMenuAsync();
+					FileTagsHelper.UpdateTagsDb();
+					await CheckAppUpdate();
+					await PeriodicallyCheckForUpdatesAsync();
+				});
 			});
 
 			static Task OptionalTaskAsync(Task task, bool condition)
