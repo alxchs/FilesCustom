@@ -137,3 +137,4 @@ Este checkout é o **Files Custom**, derivado do Files Community. Além das dire
 - Declare `NOT TESTED`, `OBSERVED`, `INFERRED` ou `CONFIRMED`; nunca invente resultado.
 - Commit local a cada passo verde; ao parar, escreva handoff em `docs/agents/handoffs/`. `git push` só com confirmação do Alexandre.
 - Mantenha o diff pequeno e isolado em arquivos próprios para acompanhar o upstream (`MASTER_SPEC.md` §13).
+- Todo exe gerado para teste leva uma nota de liberação em `docs/releases/` (e página HTML quando possível): ver "Nota de liberação" em `docs/agents/PLAYBOOK.md`.

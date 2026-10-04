@@ -76,3 +76,12 @@ Build 0/0, app aberto e feature usada de verdade (captura), casos do spec passan
 ## Tags
 
 Ao concluir um marco: `tag_<versão do Package.appxmanifest>_<assunto predominante do que mudou desde a última tag>_salvo` (METODO §9). Publicar a tag só com o Alexandre autorizando push.
+
+## Nota de liberação (sempre que gerar um exe)
+
+Pedido do Alexandre em 03/10/2026: **todo executável gerado e entregue para teste** ganha uma nota de liberação, porque o projeto tem muitos itens e ele precisa saber o que está em cada exe.
+
+- Escreva `docs/releases/AAAA-MM-DD_HHMM_build-<assunto>.md` (modelo: `docs/releases/2026-10-03_2109_build-F001.md`) e, quando a ferramenta de publicação existir na sessão, publique também uma página HTML (Artifact) com o mesmo conteúdo e informe o link.
+- Conteúdo mínimo: caminho do exe, commit e versão do pacote, resultado do build (`0 Warning(s)` / `0 Error(s)`), **o que foi liberado** (item por item, com estado CONFIRMED / OBSERVED / NOT TESTED), **como testar**, **o que ainda não está no exe** (lista das F00x) e pendências.
+- A nota descreve o exe que existe: só marque o que foi conferido, com o mesmo rigor do handoff. Sem exe novo, sem nota nova.
+- Quem não puder publicar (AGY): escreva só o `.md`; o Claude publica a página.

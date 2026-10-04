@@ -409,3 +409,6 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 src/Files.App/Assets/FilesOpenDialog/Files.App.Launcher.exe.sha256
+
+# Files Custom: release notes per exe are tracked (see docs/agents/PLAYBOOK.md)
+!/docs/releases/
