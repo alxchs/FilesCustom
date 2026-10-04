@@ -1,4 +1,4 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 namespace Files.App.Actions
@@ -21,28 +21,36 @@ namespace Files.App.Actions
 		public RichGlyph Glyph
 			=> new(themedIconStyle: "App.ThemedIcons.PanelRight");
 
+		public HotKey HotKey
+			=> new(Keys.P, KeyModifiers.Alt);
+
 		public bool IsAccessibleGlobally
-			=> false;
+			=> true;
 
 		public bool IsExecutable
-			=> infoPaneViewModel.IsEnabled;
+			=> true;
 
 		public TogglePreviewPaneAction()
 		{
-			infoPaneViewModel.PropertyChanged += ViewModel_PropertyChanged;
 		}
 
 		public Task ExecuteAsync(object? parameter = null)
 		{
-			infoPaneSettingsService.SelectedTab = InfoPaneTabs.Preview;
+			if (parameter is "Tab")
+			{
+				infoPaneSettingsService.SelectedTab = InfoPaneTabs.Preview;
+				return Task.CompletedTask;
+			}
+
+			var (isPaneOpen, selectedTab) = InfoPaneToggleHelper.Toggle(
+				infoPaneViewModel.IsEnabled,
+				infoPaneSettingsService.SelectedTab,
+				InfoPaneTabs.Preview);
+
+			infoPaneSettingsService.SelectedTab = selectedTab;
+			infoPaneViewModel.IsEnabled = isPaneOpen;
 
 			return Task.CompletedTask;
-		}
-
-		private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName is nameof(InfoPaneViewModel.IsEnabled))
-				OnPropertyChanged(nameof(IsExecutable));
 		}
 	}
 }
