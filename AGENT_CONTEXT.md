@@ -10,10 +10,10 @@ CURRENT TASK   F001 Rename UX (feature/rename-ux, em wip pela AGY); depois a fil
 ACCEPTANCE     G0 fechado; OC-rename concluído com docs/ux-reference/onecommander/rename.md e 16+ evidências
 DO NOT CHANGE  Nenhum código fora de BaseGroupableLayoutPage, layouts e helper novo de nome/extensão (§13).
 OWNER          AGY (fila do PLAYBOOK)
-CURRENT BRANCH feature/rename-ux (local main = origin/main + commits ate 3c86f0109 ainda sem push)
+CURRENT BRANCH feature/preview-details-shortcuts (a partir de feature/rename-ux; nada publicado apos ad1ef50be)
 LAST DECISION  D-001..D-009 em DECISIONS.md (D-009: F008-F011 e nova ordem)
-NEXT ACTION    AGY (com credencial valida): F005 pelo SDD (docs/specs/F005-preview-details-toggle/tasks.md); depois fechar pendencias da F001 (Grid/Column, clique na extensao). Alexandre testa a F001 no app aberto
-BLOCKER        AGY parou em 401 UNAUTHENTICATED as 21:03 (causa desconhecida; o Alexandre havia trocado para conta com cota e a AGY trabalhou 2h23 com ela). F001: build 0/0 e helper 20/20 CONFIRMED; UI so OBSERVED, Grid/Column NOT TESTED
-LAST UPDATE    2026-10-04 01:30 — Claude (D-012: SDD adotado; spec/plan/tasks da F005 criados)
+NEXT ACTION    AGY (cota renova ~04:47): F005 T6 e T7 (validar AC-1..AC-11 no app com capturas, handoff por cenario); corrigir achados do review (BOM, Open-FilesDev.ps1, scripts soltos). Alexandre testa o exe de 02:00 (nota em docs/releases)
+BLOCKER        AGY 429 (grupo gemini) as ~01:55 de 04/10, renova ~04:47. F005: T1..T5 commitados (cc7d1beb8), build 0/0 e regra 6/6 CONFIRMED; UI NOT TESTED
+LAST UPDATE    2026-10-04 02:10 — Claude (revisou T1..T5 da F005, build 0/0, nota de liberacao publicada)
 
 ```
