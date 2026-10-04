@@ -410,7 +410,7 @@
 
 					<ListView.ItemsPanel>
 						<ItemsPanelTemplate>
-							<ItemsStackPanel AreStickyGroupHeadersEnabled="True" Orientation="Vertical" />
+							<ItemsStackPanel AreStickyGroupHeadersEnabled="True" Orientation="Vertical" CacheLength="8.0" />
 						</ItemsPanelTemplate>
 					</ListView.ItemsPanel>
 

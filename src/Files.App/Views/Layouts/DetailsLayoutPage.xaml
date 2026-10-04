@@ -1353,7 +1353,7 @@
 								<Setter Property="ItemsPanel">
 									<Setter.Value>
 										<ItemsPanelTemplate>
-											<ItemsStackPanel Orientation="Vertical" />
+											<ItemsStackPanel Orientation="Vertical" CacheLength="10.0" />
 										</ItemsPanelTemplate>
 									</Setter.Value>
 								</Setter>
@@ -1462,7 +1462,7 @@
 					<!--  ListView Item Displaying Style  -->
 					<ListView.ItemsPanel>
 						<ItemsPanelTemplate>
-							<ItemsStackPanel AreStickyGroupHeadersEnabled="False" Orientation="Vertical" />
+							<ItemsStackPanel AreStickyGroupHeadersEnabled="False" Orientation="Vertical" CacheLength="10.0" />
 						</ItemsPanelTemplate>
 					</ListView.ItemsPanel>
 

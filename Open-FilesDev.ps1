@@ -43,7 +43,15 @@ function Copy-IfChanged([string]$source, [string]$target) {
     $src = Get-Item -LiteralPath $source
     if ($dst -and $dst.Length -eq $src.Length -and $dst.LastWriteTimeUtc -eq $src.LastWriteTimeUtc) { return 0 }
     New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
-    Copy-Item -LiteralPath $source -Destination $target -Force
+    try {
+        Copy-Item -LiteralPath $source -Destination $target -Force
+    } catch {
+        # Se o arquivo estiver mapeado em memoria (ex: resources.pri pelo Shell/Search), move e copia
+        $tmp = "$target.locked." + [System.Guid]::NewGuid().ToString("N")
+        Move-Item -LiteralPath $target -Destination $tmp -Force -ErrorAction SilentlyContinue
+        Copy-Item -LiteralPath $source -Destination $target -Force
+        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+    }
     return 1
 }
 
