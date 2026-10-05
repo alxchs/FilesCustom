@@ -26,8 +26,8 @@
 | F008 | Modo compacto / Densidade OneCommander | CONCLUÍDO (T1..T6 concluídos, build 0/0, evidências em docs/agents/evidence/f008/) | feature/compact-density |
 | F009 | Fontes separadas | CONCLUÍDO (T1..T5 concluídos, build 0/0, evidências em docs/agents/evidence/f009/) | feature/separate-fonts |
 | F002 | Colunas independentes | CONCLUÍDO (investigação e validação concluídas, colunas 100% independentes em pixels, evidências em docs/agents/evidence/f002/) | feature/independent-column-resize |
-| F010 | Todas as colunas do Explorer | em andamento (iniciando Fase 1 de investigação) | feature/all-explorer-columns |
-| F004 | Menu clássico | na fila | feature/classic-menu |
+| F010 | Todas as colunas do Explorer | FASE 1 CONCLUÍDA (868 propriedades mapeadas, benchmark real 1,3ms/prop, arquitetura em docs/architecture/explorer-columns.md, PENDING DECISION) | feature/all-explorer-columns |
+| F004 | Menu clássico | na fila (próxima a iniciar) | feature/classic-menu |
 | F006 | Infraestrutura de busca | na fila | feature/search-provider |
 | F011 | Escolha de motor de busca (Everything) | na fila | feature/search-engine-choice |
 
