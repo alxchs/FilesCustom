@@ -22,10 +22,10 @@
 |---|---|---|---|
 | F001 | Rename UX | CONCLUÍDO (em teste / aguardando revisão) | feature/rename-ux |
 | F005 | Preview / Details | CONCLUÍDO (T1..T7 concluídos, unit tests 6/6, evidências em docs/agents/evidence/f005/) | feature/preview-details-shortcuts |
-| F003 | Nova aba vs duplicar | iniciando validação / implementação | feature/new-vs-duplicate-tab |
+| F003 | Nova aba vs duplicar | CONCLUÍDO (T1..T4 concluídos, comprovado no app via UIA/botão +, evidências em docs/agents/evidence/f003/) | feature/new-vs-duplicate-tab |
 | F008 | Modo compacto / Densidade OneCommander | CONCLUÍDO (T1..T6 concluídos, build 0/0, evidências em docs/agents/evidence/f008/) | feature/compact-density |
 | F009 | Fontes separadas | CONCLUÍDO (T1..T5 concluídos, build 0/0, evidências em docs/agents/evidence/f009/) | feature/separate-fonts |
-| F002 | Colunas independentes | na fila | feature/independent-column-resize |
+| F002 | Colunas independentes | em andamento (iniciando SDD e investigação) | feature/independent-column-resize |
 | F010 | Todas as colunas do Explorer | na fila | feature/all-explorer-columns |
 | F004 | Menu clássico | na fila | feature/classic-menu |
 | F006 | Infraestrutura de busca | na fila | feature/search-provider |
