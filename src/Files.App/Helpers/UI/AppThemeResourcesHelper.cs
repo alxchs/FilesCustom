@@ -106,6 +106,10 @@ namespace Files.App.Helpers
 			if (appThemeFontFamily != Constants.Appearance.StandardFont)
 				service.SetAppThemeFontFamily(appThemeFontFamily);
 
+			var appThemeFileAreaFontFamily = appearance.AppThemeFileAreaFontFamily;
+			if (!string.IsNullOrWhiteSpace(appThemeFileAreaFontFamily) && appThemeFileAreaFontFamily != Constants.Appearance.StandardFont)
+				service.SetAppThemeFileAreaFontFamily(appThemeFileAreaFontFamily);
+
 			service.ApplyResources();
 		}
 	}

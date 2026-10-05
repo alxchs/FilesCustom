@@ -69,6 +69,11 @@ namespace Files.App.Data.Contracts
 		String AppThemeFontFamily { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value for the files and columns font family.
+		/// </summary>
+		String AppThemeFileAreaFontFamily { get; set; }
+
+		/// <summary>
 		/// Gets or sets a value for the theme system backdrop.
 		/// </summary>
 		BackdropMaterialType AppThemeBackdropMaterial { get; set; }

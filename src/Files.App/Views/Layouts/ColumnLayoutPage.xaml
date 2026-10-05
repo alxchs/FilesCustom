@@ -39,7 +39,7 @@
 		<converters:BoolToSelectionModeConverter x:Key="BoolToSelectionModeConverter" />
 
 		<Style TargetType="ListViewHeaderItem">
-			<Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+			<Setter Property="FontFamily" Value="{ThemeResource App.Theme.FileArea.FontFamily}" />
 			<Setter Property="FontSize" Value="{ThemeResource GridViewHeaderItemThemeFontSize}" />
 			<Setter Property="Background" Value="{ThemeResource GridViewHeaderItemBackground}" />
 			<Setter Property="Margin" Value="0,0,0,4" />
@@ -194,6 +194,7 @@
 				<ListView
 					x:Name="FileList"
 					Padding="8,0,8,0"
+					FontFamily="{ThemeResource App.Theme.FileArea.FontFamily}"
 					ext:ScrollViewerMiddleClickExtensions.EnableMiddleClickScrolling="{x:Bind IsMiddleClickToScrollEnabled, Mode=OneWay}"
 					x:FieldModifier="public"
 					AllowDrop="{x:Bind InstanceViewModel.IsPageTypeSearchResults, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"

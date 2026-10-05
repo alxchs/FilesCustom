@@ -250,6 +250,17 @@
 					SelectedItem="{x:Bind ViewModel.SelectedAppThemeFontFamilyOption, Mode=TwoWay}" />
 			</wctcontrols:SettingsCard>
 
+			<!--  Files and Columns Font  -->
+			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=AppThemeFileAreaFontFamily}">
+				<wctcontrols:SettingsCard.HeaderIcon>
+					<FontIcon Glyph="&#xE8D2;" />
+				</wctcontrols:SettingsCard.HeaderIcon>
+				<uc:ComboBoxEx
+					AutomationProperties.Name="{helpers:ResourceString Name=AppThemeFileAreaFontFamily}"
+					ItemsSource="{x:Bind ViewModel.AppThemeFontFamilyOptions.Values, Mode=OneWay}"
+					SelectedItem="{x:Bind ViewModel.SelectedAppThemeFileAreaFontFamilyOption, Mode=TwoWay}" />
+			</wctcontrols:SettingsCard>
+
 			<!--  Show tab actions  -->
 			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=ShowTabActions}">
 				<wctcontrols:SettingsCard.HeaderIcon>

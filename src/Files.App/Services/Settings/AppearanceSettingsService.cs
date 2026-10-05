@@ -91,6 +91,13 @@ namespace Files.App.Services.Settings
 		}
 
 		/// <inheritdoc/>
+		public String AppThemeFileAreaFontFamily
+		{
+			get => Get(Constants.Appearance.StandardFont);
+			set => Set(value);
+		}
+
+		/// <inheritdoc/>
 		public BackdropMaterialType AppThemeBackdropMaterial
 		{
 			get => Get(BackdropMaterialType.MicaAlt);

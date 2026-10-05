@@ -4746,4 +4746,7 @@
   <data name="AppDensityUltraCompact" xml:space="preserve">
     <value>Ultra-compacto (OneCommander)</value>
   </data>
+  <data name="AppThemeFileAreaFontFamily" xml:space="preserve">
+    <value>Fonte dos arquivos e colunas</value>
+  </data>
 </root>

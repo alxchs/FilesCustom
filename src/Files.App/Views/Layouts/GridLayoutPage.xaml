@@ -666,7 +666,7 @@
 		</DataTemplate>
 
 		<Style TargetType="GridViewHeaderItem">
-			<Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+			<Setter Property="FontFamily" Value="{ThemeResource App.Theme.FileArea.FontFamily}" />
 			<Setter Property="FontSize" Value="{ThemeResource GridViewHeaderItemThemeFontSize}" />
 			<Setter Property="Background" Value="{ThemeResource GridViewHeaderItemBackground}" />
 			<Setter Property="Margin" Value="0,0,0,4" />
@@ -989,6 +989,7 @@
 					x:Name="FileList"
 					Padding="8"
 					VerticalContentAlignment="Stretch"
+					FontFamily="{ThemeResource App.Theme.FileArea.FontFamily}"
 					ext:ScrollViewerMiddleClickExtensions.EnableMiddleClickScrolling="{x:Bind IsMiddleClickToScrollEnabled, Mode=OneWay}"
 					wctanimations:ItemsReorderAnimation.Duration="0:0:0.350"
 					x:FieldModifier="public"

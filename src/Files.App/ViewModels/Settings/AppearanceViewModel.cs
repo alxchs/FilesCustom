@@ -164,6 +164,10 @@ namespace Files.App.ViewModels.Settings
 			var selectedFontFamily = UserSettingsService.AppearanceSettingsService.AppThemeFontFamily;
 			if (!string.IsNullOrWhiteSpace(selectedFontFamily) && !AppThemeFontFamilyOptions.ContainsKey(selectedFontFamily))
 				AppThemeFontFamilyOptions.Add(selectedFontFamily, selectedFontFamily);
+
+			var selectedFileAreaFontFamily = UserSettingsService.AppearanceSettingsService.AppThemeFileAreaFontFamily;
+			if (!string.IsNullOrWhiteSpace(selectedFileAreaFontFamily) && !AppThemeFontFamilyOptions.ContainsKey(selectedFileAreaFontFamily))
+				AppThemeFontFamilyOptions.Add(selectedFileAreaFontFamily, selectedFileAreaFontFamily);
 		}
 
 		/// <summary>
@@ -306,6 +310,35 @@ namespace Files.App.ViewModels.Settings
 				var key = AppThemeFontFamilyOptions.FirstOrDefault(e => e.Value == value).Key;
 				if (key is not null)
 					AppThemeFontFamily = key;
+			}
+		}
+
+		public string AppThemeFileAreaFontFamily
+		{
+			get => UserSettingsService.AppearanceSettingsService.AppThemeFileAreaFontFamily;
+			set
+			{
+				if (value != UserSettingsService.AppearanceSettingsService.AppThemeFileAreaFontFamily)
+				{
+					UserSettingsService.AppearanceSettingsService.AppThemeFileAreaFontFamily = value;
+					ResourcesService.SetAppThemeFileAreaFontFamily(value);
+					ResourcesService.ApplyResources();
+					OnPropertyChanged();
+					OnPropertyChanged(nameof(SelectedAppThemeFileAreaFontFamilyOption));
+				}
+			}
+		}
+
+		public string SelectedAppThemeFileAreaFontFamilyOption
+		{
+			get => AppThemeFontFamilyOptions.TryGetValue(AppThemeFileAreaFontFamily, out var label)
+				? label
+				: AppThemeFontFamilyOptions[Constants.Appearance.StandardFont];
+			set
+			{
+				var key = AppThemeFontFamilyOptions.FirstOrDefault(e => e.Value == value).Key;
+				if (key is not null)
+					AppThemeFileAreaFontFamily = key;
 			}
 		}
 

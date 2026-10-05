@@ -92,6 +92,12 @@ namespace Files.App.Services
 		}
 
 		/// <inheritdoc/>
+		public void SetAppThemeFileAreaFontFamily(string appThemeFileAreaFontFamily)
+		{
+			Application.Current.Resources["App.Theme.FileArea.FontFamily"] = appThemeFileAreaFontFamily;
+		}
+
+		/// <inheritdoc/>
 		public void SetScrollInertiaEnabled(bool enableScrollInertia)
 		{
 			Application.Current.Resources["App.ScrollInertiaEnabled"] = enableScrollInertia;
