@@ -33,7 +33,7 @@ public static class VC {
         EnumDesktopWindows(hDesk, (hwnd, lparam) => {
           int p;
           GetWindowThreadProcessId(hwnd, out p);
-          if (p == pid && IsWindowVisible(hwnd)) {
+          if (p == pid) {
             var sbc = new StringBuilder(256);
             GetClassName(hwnd, sbc, 256);
             if (sbc.ToString() == "WinUIDesktopWin32WindowClass") {
