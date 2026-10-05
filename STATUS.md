@@ -23,8 +23,8 @@
 | F001 | Rename UX | CONCLUÍDO (em teste / aguardando revisão) | feature/rename-ux |
 | F005 | Preview / Details | CONCLUÍDO (T1..T7 concluídos, unit tests 6/6, evidências em docs/agents/evidence/f005/) | feature/preview-details-shortcuts |
 | F003 | Nova aba vs duplicar | pronto para confirmação | feature/new-vs-duplicate-tab |
-| F008 | Modo compacto / Densidade OneCommander | iniciando SDD (spec.md, plan.md, tasks.md) | feature/compact-density |
-| F009 | Fontes separadas | na fila | feature/separate-fonts |
+| F008 | Modo compacto / Densidade OneCommander | CONCLUÍDO (T1..T6 concluídos, build 0/0, evidências em docs/agents/evidence/f008/) | feature/compact-density |
+| F009 | Fontes separadas | iniciando SDD (spec.md, plan.md, tasks.md) | feature/separate-fonts |
 | F002 | Colunas independentes | na fila | feature/independent-column-resize |
 | F010 | Todas as colunas do Explorer | na fila | feature/all-explorer-columns |
 | F004 | Menu clássico | na fila | feature/classic-menu |

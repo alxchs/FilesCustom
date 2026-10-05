@@ -1,6 +1,7 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Enums;
 using Microsoft.UI.Xaml;
 using Windows.UI;
 
@@ -15,8 +16,10 @@ namespace Files.App.Services
 		public ResourcesService()
 		{
 			SetScrollInertiaEnabled(UserSettingsService.GeneralSettingsService.EnableSmoothScrolling);
+			SetAppThemeDensity(UserSettingsService.AppearanceSettingsService.AppDensity);
 
 			UserSettingsService.GeneralSettingsService.PropertyChanged += GeneralSettingsService_PropertyChanged;
+			UserSettingsService.AppearanceSettingsService.PropertyChanged += AppearanceSettingsService_PropertyChanged;
 		}
 
 		private void GeneralSettingsService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -24,6 +27,15 @@ namespace Files.App.Services
 			if (e.PropertyName == nameof(IGeneralSettingsService.EnableSmoothScrolling))
 			{
 				SetScrollInertiaEnabled(UserSettingsService.GeneralSettingsService.EnableSmoothScrolling);
+				ApplyResources();
+			}
+		}
+
+		private void AppearanceSettingsService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(IAppearanceSettingsService.AppDensity))
+			{
+				SetAppThemeDensity(UserSettingsService.AppearanceSettingsService.AppDensity);
 				ApplyResources();
 			}
 		}
@@ -83,6 +95,18 @@ namespace Files.App.Services
 		public void SetScrollInertiaEnabled(bool enableScrollInertia)
 		{
 			Application.Current.Resources["App.ScrollInertiaEnabled"] = enableScrollInertia;
+		}
+
+		/// <inheritdoc/>
+		public void SetAppThemeDensity(AppDensityKind density)
+		{
+			double itemHeight = density switch
+			{
+				AppDensityKind.UltraCompact => 30.0,
+				AppDensityKind.Compact => 32.0,
+				_ => 40.0,
+			};
+			Application.Current.Resources["App.Theme.Sidebar.ItemHeight"] = itemHeight;
 		}
 
 		/// <inheritdoc/>

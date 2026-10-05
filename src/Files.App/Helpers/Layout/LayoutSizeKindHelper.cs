@@ -1,11 +1,14 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Enums;
+
 namespace Files.App.Helpers
 {
 	public static class LayoutSizeKindHelper
 	{
 		private static ILayoutSettingsService LayoutSettingsService { get; } = Ioc.Default.GetRequiredService<ILayoutSettingsService>();
+		private static IUserSettingsService UserSettingsService { get; } = Ioc.Default.GetRequiredService<IUserSettingsService>();
 
 		/// <summary>
 		/// Gets the desired icon size for the requested layout
@@ -58,6 +61,12 @@ namespace Files.App.Helpers
 		/// <returns></returns>
 		public static int GetDetailsViewRowHeight(DetailsViewSizeKind detailsViewSizeKind)
 		{
+			var density = UserSettingsService.AppearanceSettingsService.AppDensity;
+			if (density == AppDensityKind.UltraCompact)
+				return 24;
+			if (density == AppDensityKind.Compact)
+				return 28;
+
 			switch (detailsViewSizeKind)
 			{
 				case DetailsViewSizeKind.Compact:
@@ -120,6 +129,12 @@ namespace Files.App.Helpers
 		/// <returns></returns>
 		public static int GetListViewRowHeight(ListViewSizeKind listViewSizeKind)
 		{
+			var density = UserSettingsService.AppearanceSettingsService.AppDensity;
+			if (density == AppDensityKind.UltraCompact)
+				return 22;
+			if (density == AppDensityKind.Compact)
+				return 24;
+
 			switch (listViewSizeKind)
 			{
 				case ListViewSizeKind.Compact:
@@ -144,6 +159,12 @@ namespace Files.App.Helpers
 		/// <returns></returns>
 		public static int GetColumnsViewRowHeight(ColumnsViewSizeKind columnsViewSizeKind)
 		{
+			var density = UserSettingsService.AppearanceSettingsService.AppDensity;
+			if (density == AppDensityKind.UltraCompact)
+				return 22;
+			if (density == AppDensityKind.Compact)
+				return 24;
+
 			switch (columnsViewSizeKind)
 			{
 				case ColumnsViewSizeKind.Compact:

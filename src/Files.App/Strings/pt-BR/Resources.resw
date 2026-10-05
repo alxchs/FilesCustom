@@ -4734,4 +4734,16 @@
   <data name="ConfirmRemoveTagsDialogContent" xml:space="preserve">
     <value>Tem certeza que deseja remover as etiquetas dos itens selecionadas?</value>
   </data>
+  <data name="AppDensity" xml:space="preserve">
+    <value>Densidade da interface</value>
+  </data>
+  <data name="AppDensityNormal" xml:space="preserve">
+    <value>Normal (padrão)</value>
+  </data>
+  <data name="AppDensityCompact" xml:space="preserve">
+    <value>Compacto</value>
+  </data>
+  <data name="AppDensityUltraCompact" xml:space="preserve">
+    <value>Ultra-compacto (OneCommander)</value>
+  </data>
 </root>

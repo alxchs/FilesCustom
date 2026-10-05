@@ -1,6 +1,7 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // SPDX-License-Identifier: MPL-2.0
 
+using Files.App.Data.Enums;
 using Windows.UI;
 
 namespace Files.App.Data.Contracts
@@ -68,5 +69,11 @@ namespace Files.App.Data.Contracts
 		/// </summary>
 		/// <param name="enableScrollInertia"></param>
 		void SetScrollInertiaEnabled(bool enableScrollInertia);
+
+		/// <summary>
+		/// Overrides the XAML resource for App.Theme.Sidebar.ItemHeight according to density
+		/// </summary>
+		/// <param name="density"></param>
+		void SetAppThemeDensity(AppDensityKind density);
 	}
 }

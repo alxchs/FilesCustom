@@ -1,4 +1,4 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <Page
 	x:Class="Files.App.Views.Settings.AppearancePage"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -111,6 +111,17 @@
 					AutomationProperties.Name="{helpers:ResourceString Name=BackdropMaterial}"
 					ItemsSource="{x:Bind ViewModel.BackdropMaterialTypes.Values}"
 					SelectedItem="{x:Bind ViewModel.SelectedBackdropMaterial, Mode=TwoWay}" />
+			</wctcontrols:SettingsCard>
+
+			<!--  Interface Density  -->
+			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=AppDensity}">
+				<wctcontrols:SettingsCard.HeaderIcon>
+					<FontIcon Glyph="&#xE736;" />
+				</wctcontrols:SettingsCard.HeaderIcon>
+				<uc:ComboBoxEx
+					AutomationProperties.Name="{helpers:ResourceString Name=AppDensity}"
+					ItemsSource="{x:Bind ViewModel.AppDensityOptions, Mode=OneWay}"
+					SelectedIndex="{x:Bind ViewModel.SelectedAppDensityIndex, Mode=TwoWay}" />
 			</wctcontrols:SettingsCard>
 
 			<!--  App Background  -->

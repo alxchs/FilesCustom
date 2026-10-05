@@ -1,6 +1,7 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Enums;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
@@ -134,5 +135,10 @@ namespace Files.App.Data.Contracts
 		/// This is used to inject only newly introduced default actions for existing user configs.
 		/// </summary>
 		Dictionary<string, List<string>>? LastKnownToolbarDefaults { get; set; }
+
+		/// <summary>
+		/// Gets or sets the application density kind (Normal, Compact, UltraCompact).
+		/// </summary>
+		AppDensityKind AppDensity { get; set; }
 	}
 }

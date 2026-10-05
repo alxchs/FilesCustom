@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using CommunityToolkit.WinUI.Helpers;
+using Files.App.Data.Enums;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System.Drawing.Text;
@@ -21,6 +22,7 @@ namespace Files.App.ViewModels.Settings
 		private readonly IResourcesService ResourcesService;
 
 		public List<string> Themes { get; private set; }
+		public List<string> AppDensityOptions { get; private set; }
 		public Dictionary<BackdropMaterialType, string> BackdropMaterialTypes { get; private set; } = [];
 
 		public Dictionary<Stretch, string> ImageStretchTypes { get; private set; } = [];
@@ -51,6 +53,14 @@ namespace Files.App.ViewModels.Settings
 				Strings.LightTheme.GetLocalizedResource(),
 				Strings.DarkTheme.GetLocalizedResource()
 			];
+
+			AppDensityOptions =
+			[
+				Strings.AppDensityNormal.GetLocalizedResource(),
+				Strings.AppDensityCompact.GetLocalizedResource(),
+				Strings.AppDensityUltraCompact.GetLocalizedResource(),
+			];
+			selectedAppDensityIndex = (int)UserSettingsService.AppearanceSettingsService.AppDensity;
 
 			BackdropMaterialTypes.Add(BackdropMaterialType.Solid, Strings.None.GetLocalizedResource());
 			BackdropMaterialTypes.Add(BackdropMaterialType.Acrylic, Strings.Acrylic.GetLocalizedResource());
@@ -214,6 +224,22 @@ namespace Files.App.ViewModels.Settings
 		public ElementTheme SelectedElementTheme
 		{
 			get => (ElementTheme)selectedThemeIndex;
+		}
+
+		private int selectedAppDensityIndex;
+		public int SelectedAppDensityIndex
+		{
+			get => selectedAppDensityIndex;
+			set
+			{
+				if (SetProperty(ref selectedAppDensityIndex, value))
+				{
+					var density = (AppDensityKind)value;
+					UserSettingsService.AppearanceSettingsService.AppDensity = density;
+					ResourcesService.SetAppThemeDensity(density);
+					ResourcesService.ApplyResources();
+				}
+			}
 		}
 
 		public string AppThemeBackgroundColor

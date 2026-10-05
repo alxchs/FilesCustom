@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Enums;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
@@ -178,6 +179,13 @@ namespace Files.App.Services.Settings
 		{
 			get => Get<Dictionary<string, List<string>>?>(null);
 			set => Set(value);
+		}
+
+		/// <inheritdoc/>
+		public AppDensityKind AppDensity
+		{
+			get => (AppDensityKind)Get((int)AppDensityKind.Normal);
+			set => Set((int)value);
 		}
 
 		protected override void RaiseOnSettingChangedEvent(object sender, SettingChangedEventArgs e)

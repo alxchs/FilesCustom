@@ -201,6 +201,7 @@ namespace Files.App.Views.Layouts
 			shellViewModel.PageTypeUpdated += FilesystemViewModel_PageTypeUpdated;
 			shellViewModel.ItemLoadStatusChanged += ShellViewModel_ItemLoadStatusChanged;
 			UserSettingsService.LayoutSettingsService.PropertyChanged += LayoutSettingsService_PropertyChanged;
+			UserSettingsService.AppearanceSettingsService.PropertyChanged += AppearanceSettingsService_PropertyChanged;
 			FileList.Items.VectorChanged += FileListItems_VectorChanged;
 
 			var parameters = (NavigationArguments)eventArgs.Parameter;
@@ -232,6 +233,7 @@ namespace Files.App.Views.Layouts
 			shellViewModel.PageTypeUpdated -= FilesystemViewModel_PageTypeUpdated;
 			shellViewModel.ItemLoadStatusChanged -= ShellViewModel_ItemLoadStatusChanged;
 			UserSettingsService.LayoutSettingsService.PropertyChanged -= LayoutSettingsService_PropertyChanged;
+			UserSettingsService.AppearanceSettingsService.PropertyChanged -= AppearanceSettingsService_PropertyChanged;
 			FileList.Items.VectorChanged -= FileListItems_VectorChanged;
 			_autoFitColumnsTimer?.Stop();
 		}
@@ -251,6 +253,7 @@ namespace Files.App.Views.Layouts
 				shellViewModel.ItemLoadStatusChanged -= ShellViewModel_ItemLoadStatusChanged;
 			}
 			UserSettingsService.LayoutSettingsService.PropertyChanged -= LayoutSettingsService_PropertyChanged;
+			UserSettingsService.AppearanceSettingsService.PropertyChanged -= AppearanceSettingsService_PropertyChanged;
 			FileList.Items.VectorChanged -= FileListItems_VectorChanged;
 			_autoFitColumnsTimer?.Stop();
 			base.Dispose();
@@ -307,17 +310,29 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		private void AppearanceSettingsService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(IAppearanceSettingsService.AppDensity))
+			{
+				var previousOffset = ContentScroller?.VerticalOffset;
+				NotifyPropertyChanged(nameof(RowHeight));
+				SetItemContainerStyle();
+				ContentScroller?.ChangeView(null, previousOffset, null);
+			}
+		}
+
 		/// <summary>
 		/// Sets the item size and spacing
 		/// </summary>
 		private void SetItemContainerStyle()
 		{
 			var size = UserSettingsService.LayoutSettingsService.DetailsViewSize;
-			if (itemContainerSize != size)
+			var isCompact = size == DetailsViewSizeKind.Compact || UserSettingsService.AppearanceSettingsService.AppDensity != AppDensityKind.Normal;
+			if (itemContainerSize != size || isCompact)
 			{
 				// Changing size still requires a style refresh, even when both sizes use the same style.
-				FileList.ItemContainerStyle = size == DetailsViewSizeKind.Compact ? RegularItemContainerStyle : CompactItemContainerStyle;
-				FileList.ItemContainerStyle = size == DetailsViewSizeKind.Compact ? CompactItemContainerStyle : RegularItemContainerStyle;
+				FileList.ItemContainerStyle = isCompact ? RegularItemContainerStyle : CompactItemContainerStyle;
+				FileList.ItemContainerStyle = isCompact ? CompactItemContainerStyle : RegularItemContainerStyle;
 				itemContainerSize = size;
 			}
 
@@ -326,7 +341,7 @@ namespace Files.App.Views.Layouts
 
 			// Compact rows use a -2px ItemContainer margin, so the header checkbox needs an extra
 			// left offset to stay aligned with row checkboxes.
-			var leftOffset = UserSettingsService.LayoutSettingsService.DetailsViewSize == DetailsViewSizeKind.Compact ? -4 : 0;
+			var leftOffset = isCompact ? -4 : 0;
 			SelectAllCheckbox.Margin = new Thickness(leftOffset, 14, 0, 0);
 		}
 
