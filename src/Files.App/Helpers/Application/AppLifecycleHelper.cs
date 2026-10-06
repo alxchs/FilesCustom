@@ -4,6 +4,7 @@
 
 using Files.App.Helpers.Application;
 using Files.App.Services.Git;
+using Files.App.Services.Search;
 using Files.App.Services.SizeProvider;
 using Files.App.Utils.Logger;
 using Files.App.ViewModels.Settings;
@@ -368,6 +369,8 @@ namespace Files.App.Helpers
 					.AddSingleton<IStorageCacheService, StorageCacheService>()
 					.AddSingleton<IIconCacheService, IconCacheService>()
 					.AddSingleton<IStorageArchiveService, StorageArchiveService>()
+					.AddSingleton<ISearchProvider, NativeFilesSearchProvider>()
+					.AddSingleton<ISearchProviderFactory, SearchProviderFactory>()
 					.AddSingleton<IStorageSecurityService, StorageSecurityService>()
 					.AddSingleton<IWindowsCompatibilityService, WindowsCompatibilityService>()
 					.AddSingleton</*IVersionControlService,*/ LibGit2Service>()
