@@ -1,32 +1,39 @@
-# F010 — Plano de Investigação e Desenho (Fase 1)
+# F010 — Plano de Implementação (Fase 2)
 
 ## Etapas de Execução
 
-### T1 — Enumerar Propriedades do Windows Property System
-- Criar script C# / PowerShell em `tools/perf/enumerate_properties.ps1` usando `PSEnumeratePropertyDescriptions` (`propsys.dll`).
-- Extrair:
-  - Quantidade total de propriedades registradas no Windows 11.
-  - Nome canônico (`System.Author`, `System.Image.Dimensions`, etc.).
-  - Nome localizado em português do Brasil e inglês.
-  - Tipo de dado e representação (`PROPVARIANT` type).
-  - Flags de exibição (`PROPDESC_VIEW_FLAGS`).
-- Comparar com a janela "More Details" do Explorer.
+### T2.1 — Modelo de Dados e Suporte a Propriedades em `ListedItem`
+- Adicionar `DynamicColumnDefinition` em `src/Files.App/Data/Models/`.
+- Adicionar armazenamento esparso sob demanda em `src/Files.App/Data/Items/ListedItem.cs`:
+  - `Dictionary<string, string>? _dynamicProperties`
+  - `GetDynamicProperty(string canonicalName)`
+  - `SetDynamicProperty(string canonicalName, string value)`
 
-### T2 — Teste Empírico de Leitura de Valores (`IPropertyStore` / `IShellItem2`)
-- Criar script em `tools/perf/test_property_read.ps1` para ler propriedades reais de arquivos de mídia, documentos e imagens.
-- Testar nos arquivos existentes de `C:\FilesUXLab` e mídia do sistema:
-  - Imagem JPG/PNG (Dimensões, Câmera).
-  - Áudio MP3 (Título, Artista, Duração).
-  - Vídeo MP4.
-  - Documentos PDF/TXT/DOCX.
-- Medir a latência por propriedade e por item (Stopwatch em microssegundos / milissegundos).
-- Calcular o impacto em 10.000 itens se carregado síncrono vs assíncrono virtualizado.
+### T2.2 — Catálogo de Propriedades do Explorer (`IExplorerPropertyService`)
+- Criar contrato `IExplorerPropertyService` em `src/Files.App/Data/Contracts/`.
+- Criar implementação `ExplorerPropertyService` em `src/Files.App/Services/`:
+  - Catálogo nativo das principais propriedades de colunas do Windows Explorer (`PDEF_COLUMN`), divididas por categoria (Mídia, Imagem, Áudio, Vídeo, Documento, etc.).
+  - Tradução e nomes amigáveis em pt-BR e en-US via recursos ou Windows Property System.
+  - Registro no container IoC (`AppLifecycleHelper.cs`).
 
-### T3 — Análise de Integração no Files App
-- Analisar a classe `ShellItemPropertyStore` existente em `src/Files.App/Utils/Shell/ShellItem.cs` que já utiliza `PInvoke.PSFormatForDisplayAlloc`.
-- Analisar como estender `ListedItem` para armazenar propriedades dinâmicas sem overhead de memória desnecessário (ex.: dicionário esparso ou array indexado por ID de coluna visível).
-- Desenhar a interface do Seletor de Colunas (diálogo modal com busca incremental, árvore/lista agrupada por categoria, checkboxes e reordenação).
+### T2.3 — Extrator Virtualizado em Background
+- Integrar a extração de propriedades dinâmicas ativas em `ShellViewModel.LoadExtendedItemPropertiesAsync`:
+  - Utilizar `ShellItemPropertyStore` existente com `PSFormatForDisplayAlloc`.
+  - Execução assíncrona com cancelamento e pausa durante scroll rápido.
 
-### T4 — Elaboração do Relatório de Arquitetura e Decisão
-- Produzir `docs/architecture/explorer-columns.md`.
-- Concluir Fase 1 com status `PENDING DECISION` para validação do Claude e do usuário antes de codar a Fase 2.
+### T2.4 — Renderização Dinâmica no DetailsLayoutPage
+- Estender `ColumnsViewModel` para expor a lista de `DynamicColumnDefinition` ativas.
+- Atualizar `DetailsLayoutPage.xaml.cs` para adicionar dinamicamente cabeçalhos e colunas na Grid do layout quando colunas extras estiverem habilitadas.
+- Suporte a redimensionamento com o `GridSplitter` da F002.
+
+### T2.5 — Diálogo Seletor de Colunas ("Mais..." / "Choose Details")
+- Adicionar opção *"Mais..."* no menu de contexto do cabeçalho de colunas (`DetailsLayoutPage.xaml`).
+- Criar `ChooseDetailsDialog.xaml` com busca, árvore/lista agrupada por categoria, seleção com checkboxes e reordenação.
+
+### T2.6 — Persistência por Pasta
+- Atualizar `LayoutPreferencesManager` para persistir as colunas dinâmicas ativas e suas larguras no Registro da pasta.
+
+### T2.7 — Validação e Evidências
+- Compilação Release x64: `0 Warning(s), 0 Error(s)`.
+- Abrir pasta com imagens/mídia (`C:\FilesUXLab\perf\img400`), adicionar colunas (ex: Dimensões, Câmera), validar exibição de dados reais e capturar telas.
+- Nota de liberação e handoff.

@@ -1,40 +1,43 @@
 # F010 — Todas as Colunas do Windows Explorer
 
-## Objetivo
+## 1. Objetivo
 
-Permitir que o usuário inclua no layout Details do Files App qualquer coluna oferecida pelo Windows Explorer (o diálogo "More..." do Explorer com centenas de propriedades do Windows Property System: Autor, Álbum, Dimensões, Duração, Taxa de bits, Data de captura, Câmera, Modelo, etc.), além das 16 colunas fixas atuais do Files.
+Permitir que o usuário inclua no layout Details do Files App qualquer coluna oferecida pelo Windows Explorer (o diálogo "Escolher Detalhes... / More..." do Explorer com centenas de propriedades do Windows Property System: Autor, Álbum, Dimensões, Duração, Taxa de bits, Data de captura, Câmera, Modelo, etc.), além das 16 colunas fixas atuais do Files.
 
-## Origem
+## 2. Origem e Decisão de Arquitetura
 
-MASTER_SPEC §46 (pedido expresso do Alexandre, D-009). Task brief em `docs/agents/tasks/F010-all-explorer-columns.md`.
+- **Origem:** MASTER_SPEC §46 (pedido expresso do Alexandre, D-009). Task brief em `docs/agents/tasks/F010-all-explorer-columns.md`.
+- **Arquitetura Aprovada (06/10/2026):** **Opção A — Abordagem Híbrida**:
+  - As 16 colunas padrão existentes permanecem estáticas e de alto desempenho no XAML/ViewModel (zero risco de regressão no uso cotidiano).
+  - Colunas estendidas do Windows Explorer são injetadas dinamicamente sob demanda.
+  - Armazenamento esparso em memória (`ListedItem` com dicionário alocado sob demanda, custo zero de RAM quando inativo).
+  - Extração estritamente assíncrona, virtualizada e em segundo plano (`scrollSettledTcs` + `CancellationToken`), garantindo fluidez mesmo em pastas com 10.000 itens.
+  - Persistência híbrida por pasta (mantém formato existente no Registro e adiciona string JSON para colunas customizadas).
 
-## Escopo da Fase 1 (Investigação e Arquitetura — sem código de produto)
+---
 
-1. **Enumeração das Propriedades do Explorer**:
-   - Enumerar via `PSEnumeratePropertyDescriptions` do Windows Property System todas as propriedades visualizáveis.
-   - Comparar com a lista do diálogo "Choose Details / More..." do Windows Explorer.
-   - Categorizar por grupo (Geral, Mídia, Imagem, Documento, Áudio, Vídeo, etc.).
-   - Mapear nome canônico (`System.*`), nome localizado (em pt-BR e en-US), tipo de dado (string, data, número, tamanho, enum), capacidade de ordenação/agrupamento (`PDTF` / `PDSD`).
+## 3. Escopo da Fase 1 (Concluída)
+- Enumeração de 868 propriedades do Windows 11 (`369` colunas elegíveis).
+- Prova de conceito e benchmark empírico: 1,3 ms por propriedade via `IShellItem2` e `PSFormatForDisplayAlloc`.
+- Documentação arquitetural em `docs/architecture/explorer-columns.md`.
 
-2. **Prova de Leitura de Valores**:
-   - Provar que `IShellItem2.GetProperty` / `IPropertyStore` lê os valores com precisão para diferentes tipos de arquivo reais:
-     - Foto com EXIF (`.jpg` / `.png`): Dimensões, Data de captura, Câmera, Fabricante.
-     - Áudio (`.mp3`): Artista, Álbum, Título, Duração, Taxa de bits, Ano.
-     - Vídeo (`.mp4`): Duração, Largura/Altura do quadro, Taxa de quadros.
-     - Documentos (`.docx`, `.pdf`): Autor, Páginas, Contagem de palavras.
-   - Medir o tempo de extração por item e projetar o custo em 10.000 itens (§31).
+---
 
-3. **Mapeamento de Impacto no Files**:
-   - Mapear as 16 colunas fixas atuais no `ColumnsViewModel` e no XAML.
-   - Reaproveitamento da infraestrutura existente (`ShellItemPropertyStore`, `PSFormatForDisplayAlloc`, `RetrievePropertiesAsync`).
-   - Identificar alterações necessárias para suportar um modelo **dinâmico** de colunas.
+## 4. Escopo da Fase 2 (Implementação da Arquitetura Híbrida)
 
-4. **Proposta de Desenho Arquitetural (`docs/architecture/explorer-columns.md`)**:
-   - Modelo de dados dinâmico de colunas.
-   - Estratégia de carregamento sob demanda (apenas linhas visíveis, thread em background, cancelável, sem engasgo de rolagem).
-   - Mecanismo de persistência por pasta / tipo de pasta (compatível com a persistência de registro existente).
-   - Seletor de colunas com busca, agrupamento por categoria e ordenação.
-
-## Critérios de Aceitação (Fase 1)
-
-Documento `docs/architecture/explorer-columns.md` contendo todos os números e comparações medidas de forma empírica (`OBSERVED` / `CONFIRMED`, com scripts de reprodução em `tools/perf/`); nenhuma alteração invasiva em `src/` nesta fase.
+1. **Catálogo de Propriedades do Windows Property System**:
+   - Serviço `IExplorerPropertyService` que expõe a lista de 369 propriedades com nome canônico (`System.*`), nome localizado (pt-BR e en-US), categoria e alinhamento padrão.
+2. **Modelo de Dados e Armazenamento Esparso**:
+   - `DynamicColumnDefinition`: representa uma coluna dinâmica ativa (CanonicalName, DisplayName, Width, Category).
+   - `ListedItem`: método `GetDynamicProperty` e `SetDynamicProperty` com dicionário alocado sob demanda.
+3. **Extração Virtualizada em Segundo Plano**:
+   - Integração com `ShellViewModel.LoadExtendedItemPropertiesAsync`: extrai propriedades dinâmicas ativas apenas para itens no viewport durante repouso.
+4. **Interface do Usuário (Layout Details)**:
+   - Opção *"Mais..."* no menu de contexto do cabeçalho de colunas.
+   - Diálogo `ChooseDetailsDialog` WinUI 3 com busca rápida, lista por categorias, checkboxes e reordenação.
+   - Renderização no cabeçalho e linhas do `DetailsLayoutPage` para as colunas dinâmicas ativas.
+5. **Persistência**:
+   - Gravação das colunas ativas e suas larguras nas preferências da pasta via Registro.
+6. **Qualidade e Performance**:
+   - Build Release x64 limpo: `0 Warning(s), 0 Error(s)`.
+   - Testes e capturas de tela comprovando a exibição de colunas extras (ex.: *Dimensões*, *Câmera*, *Autores*).
