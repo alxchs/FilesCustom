@@ -27,7 +27,7 @@ public static class Thr {
           if (p == pid && IsWindowVisible(hwnd)) {
             var sb = new StringBuilder(256);
             GetWindowText(hwnd, sb, 256);
-            if (sb.Length > 0) {
+            if (sb.Length > 0 && sb.ToString() != "PopupHost") {
               result = hwnd;
               return false;
             }

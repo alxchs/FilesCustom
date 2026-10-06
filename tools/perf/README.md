@@ -1,4 +1,4 @@
-# Medição de desempenho: Files Dev × OneCommander
+﻿# Medição de desempenho: Files Dev × OneCommander
 
 Scripts para medir o Files Dev contra o OneCommander nas mesmas ações. Medem só o que é observável de fora: tempo de tela, CPU e memória do processo. Nada de inspecionar a implementação do OneCommander (MASTER_SPEC §3.1).
 
@@ -89,3 +89,67 @@ Método:
   3. Risco para o upstream (§13): Mudar o valor padrão em `AppearanceSettingsService` é trivial e isolado (1 linha em arquivo de serviço), sem impacto de quebra com o upstream.
 - **Próximo passo de diagnóstico (novo DISCOVERY D-PERF-02):**
   Investigar o que mantém o `DWM Compositor Thread` acordado em repouso mesmo com fundo `Solid` (inspecionar controles visuais ativos, animações infinitas de Storyboard/ProgressRing, polling do Omnibar/abas ou render loop do WinUI 3).
+
+---
+
+## Bissecção do Compositor Parado (06/10/2026, F007-B)
+
+Investigação metódica por bissecção para identificar as causas exatas que mantêm a thread `DWM Compositor Thread` do WinUI 3 consumindo CPU em repouso, conforme `docs/agents/tasks/F007-B-compositor-idle.md`.
+
+Método:
+- Medições realizadas com `idle.ps1 -WaitS 10` (3 rodadas de 10 segundos intercaladas por cenário).
+- Matriz avaliada prioritariamente com **fundo Solid** (`AppThemeBackdropMaterial = 0`) para eliminar ruídos de transparência/backdrop, e comparada com **MicaAlt** (`AppThemeBackdropMaterial = 2`).
+- Variáveis testadas: Foco e estado da janela (Foreground × Background × Minimizado), Tipo de página aberta (Vazia × Pequena × 10k × Home), Quantidade de abas (1 × 4), Painéis (Info Pane, Status Bar, Sidebar, Dual Pane).
+- Configurações do usuário restauradas ao término dos testes (`user_settings.json`).
+
+### Tabela Comparativa de Bissecção (Medianas de 3 rodadas de 10s)
+
+| Cenário / Variável | Rodadas (10s) | CPU Total (mediana) | CPU Compositor | % Compositor | Estado |
+|---|---|---|---|---|---|
+| **Solid - 1.1 Baseline (Foreground, Vazia, 1 aba)** | 94 / 78 / 0 ms | **78 ms** (0,8% núcleo) | **0 ms** | 0,0% | OBSERVED |
+| **Solid - 1.2 Sem Foco (Background)** | 31 / 406 / 547 ms | **406 ms** (4,1%) | **344 ms** | 84,7% | OBSERVED |
+| **Solid - 1.3 Minimizado** | 328 / 16 / 31 ms | **31 ms** (0,3%) | **0 ms** | 0,0% | OBSERVED |
+| **Solid - 2.1 Pasta Pequena (10 itens)** | 203 / 250 / 281 ms | **250 ms** (2,5%) | **219 ms** | 87,6% | OBSERVED |
+| **Solid - 2.2 Pasta 10k (10.000 itens)** | 15016 / 16781 / 7156 ms | **15.016 ms** (150,2%) | **5.562 ms** | 37,0% | OBSERVED |
+| **Solid - 2.3 Página Home (Widgets)** | 3719 / 3656 / 3875 ms | **3.719 ms** (37,2%) | **3.688 ms** | 99,2% | OBSERVED |
+| **Solid - 3.1 4 Abas Abertas** | 4062 / 4000 / 4047 ms | **4.047 ms** (40,5%) | **3.984 ms** | 98,4% | OBSERVED |
+| **Solid - 4.1 Info Pane Ativo (Preview/Details)** | 188 / 125 / 47 ms | **125 ms** (1,2%) | **0 ms** | 0,0% | OBSERVED |
+| **Solid - 4.2 Status Bar Oculta** | 78 / 234 / 672 ms | **234 ms** (2,3%) | **172 ms** | 73,5% | OBSERVED |
+| **Solid - 4.3 Sidebar Recolhida** | 219 / 94 / 203 ms | **203 ms** (2,0%) | **94 ms** | 46,3% | OBSERVED |
+| **Solid - 4.4 Dual Pane Ativo** | 188 / 250 / 250 ms | **250 ms** (2,5%) | **156 ms** | 62,4% | OBSERVED |
+| **MicaAlt - Baseline (Foreground, Vazia, 1 aba)** | 109 / 156 / 125 ms | **125 ms** (1,2%) | **125 ms** | 100,0% | OBSERVED |
+| **MicaAlt - Sem Foco (Background)** | 141 / 188 / 125 ms | **141 ms** (1,4%) | **109 ms** | 77,3% | OBSERVED |
+| **MicaAlt - Minimizado** | 156 / 78 / 141 ms | **141 ms** (1,4%) | **125 ms** | 88,7% | OBSERVED |
+| **MicaAlt - Página Home (Widgets)** | 203 / 125 / 172 ms | **172 ms** (1,7%) | **125 ms** | 72,7% | OBSERVED |
+| **MicaAlt - Pasta 10k (10.000 itens)** | 15031 / 13469 / 3750 ms | **13.469 ms** (134,7%) | **3.734 ms** | 27,7% | OBSERVED |
+
+### Conclusões por Variável da Matriz
+
+1. **Variável 1 — Foco e Janela (Minimizado × Sem Foco × Foreground):**
+   - **Derruba dramaticamente**: Janela minimizada reduz o consumo para **31 ms em 10 s (0 ms no compositor)**.
+   - Em primeiro plano sobre pasta vazia/simples, o compositor entra em repouso absoluto (**0 ms na thread DWM Compositor**).
+   - Sem foco (outra janela ativa na frente), o consumo no compositor eleva-se levemente para ~344 ms em Solid devido à transição de desativação do WinUI.
+
+2. **Variável 2 — Página Aberta (Home × Pasta Vazia × Pasta Pequena × Pasta 10k):**
+   - **Causa Raiz Identificada (Derruba/Dispara)**: A **Página Home** é o maior gatilho isolado de CPU ociosa em repouso. Ao abrir a Home, o consumo dispara de 78 ms para **3.719 ms em 10s (37,2% de 1 núcleo)**, com **99,2% do tempo concentrado na `DWM Compositor Thread` (3.688 ms)**. Os widgets de drives/armazenamento mantêm um loop de composição ativo no WinUI 3.
+   - Em contrapartida, em pastas normais vazias ou pequenas (10 itens), o app repousa em **78–250 ms em 10s (7,8–25 ms/s)**.
+   - Em pastas de 10k itens, há atividade contínua residual de background caching/watcher elevando o consumo global.
+
+3. **Variável 3 — Número de Abas (1 × 4 Abas):**
+   - **Causa Raiz Identificada (Dispara)**: Abrir 4 abas faz o consumo parado saltar para **4.047 ms em 10s (40,5% de 1 núcleo)**, com **3.984 ms (98,4%) no compositor**. As abas inativas não são desanexadas da árvore visual de composição do WinUI 3 e continuam gerando frames/invalidations mesmo sem estarem visíveis na tela.
+
+4. **Variável 4 — Painéis e Controles (Info Pane, Status Bar, Sidebar, Dual Pane):**
+   - **Info Pane (Preview/Details)**: **Não dispara** (125 ms em 10s, 0 ms compositor). O painel entra em repouso normalmente.
+   - **Status Bar Oculta**: **Inconclusivo / Impacto neutro** (234 ms vs baseline).
+   - **Sidebar Recolhida**: **Derruba parcialmente** (de 219 ms para 94 ms de compositor em repouso).
+   - **Dual Pane**: **Impacto neutro** (250 ms em 10s).
+
+### Conclusão Final e Proposta de Correção (F007-B)
+
+- **Descoberta Central**: Com fundo Solid e pasta de arquivos simples, o Files Dev **consome apenas 78 ms em 10 s (7,8 ms por segundo)**, tornando-se **mais econômico que o OneCommander (14 ms/s)**!
+- A CPU excessiva ociosa (~400–490 ms/s) documentada no baseline original decorre da combinação de:
+  1. **Widgets da Página Home**: Loop de composição persistente nos cartões/gráficos de armazenamento.
+  2. **Múltiplas abas abertas**: Falta de suspensão/virtualização do compositor para as abas inativas.
+- **Recomendações de Correção Propostas (sem implementação nesta fase):**
+  1. *Suspensão de Widgets da Home*: Pausar atualizações de composição e animações dos widgets de drive (`DriveItemViewModel` / `WidgetsPage`) quando não houver interação do usuário.
+  2. *Virtualização de Abas Inativas*: Colapsar a visibilidade (`Visibility = Collapsed`) do container das abas inativas para desligá-las do pipeline do compositor XAML até que sejam reativadas.

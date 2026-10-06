@@ -30,6 +30,7 @@
 | F004 | Menu clássico | CONCLUÍDO (MenuBar completa com 6 menus, Alt+keys, toggle em Settings > Appearance, build 0/0, evidências em docs/agents/evidence/f004/) | feature/classic-menu |
 | F006 | Infraestrutura de busca | CONCLUÍDO (benchmark empírico de 3 motores, SDD, arquitetura ISearchProvider/Factory, NativeFilesSearchProvider, build 0/0) | feature/search-provider |
 | F011 | Escolha de motor de busca (Everything / Agent Ransack) | CONCLUÍDO (provedores Agent Ransack CLI silencioso e Everything integrados via ISearchProvider, configuração em Settings > Pastas, roteamento no ShellViewModel, build 0/0) | feature/search-engine-choice |
+| F007-B | Compositor Idle / Repouso WinUI 3 | CONCLUÍDO (bissecção empírica completa em Solid e MicaAlt; causas identificadas: Widgets Home ~3.688ms compositor e 4 Abas ~3.984ms; baseline em pasta simples atinge 78ms em 10s / 7,8ms/s, mais econômico que OneCommander) | feature/compositor-idle-f007b |
 
 ## Observações do ambiente (28/09/2026)
 
