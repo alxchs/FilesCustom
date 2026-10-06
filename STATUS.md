@@ -29,7 +29,7 @@
 | F010 | Todas as colunas do Explorer | FASE 1 CONCLUÍDA (868 propriedades mapeadas, benchmark real 1,3ms/prop, arquitetura em docs/architecture/explorer-columns.md, PENDING DECISION) | feature/all-explorer-columns |
 | F004 | Menu clássico | CONCLUÍDO (MenuBar completa com 6 menus, Alt+keys, toggle em Settings > Appearance, build 0/0, evidências em docs/agents/evidence/f004/) | feature/classic-menu |
 | F006 | Infraestrutura de busca | CONCLUÍDO (benchmark empírico de 3 motores, SDD, arquitetura ISearchProvider/Factory, NativeFilesSearchProvider, build 0/0) | feature/search-provider |
-| F011 | Escolha de motor de busca (Everything / Agent Ransack) | na fila (próxima a iniciar) | feature/search-engine-choice |
+| F011 | Escolha de motor de busca (Everything / Agent Ransack) | CONCLUÍDO (provedores Agent Ransack CLI silencioso e Everything integrados via ISearchProvider, configuração em Settings > Pastas, roteamento no ShellViewModel, build 0/0) | feature/search-engine-choice |
 
 ## Observações do ambiente (28/09/2026)
 

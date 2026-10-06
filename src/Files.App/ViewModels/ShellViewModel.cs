@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Contracts;
 using Files.App.Services.SizeProvider;
 using Files.Shared.Helpers;
 using LibGit2Sharp;
@@ -3461,7 +3462,22 @@ namespace Files.App.ViewModels
 				await ApplyFilesAndFoldersChangesAsync();
 			};
 
-			await search.SearchAsync(results, searchCTS.Token);
+			var searchProviderFactory = Ioc.Default.GetService<ISearchProviderFactory>();
+			var provider = searchProviderFactory?.GetCurrentProvider();
+			if (provider is not null && provider.Id != "native")
+			{
+				var request = new SearchRequest
+				{
+					Query = search.Query ?? string.Empty,
+					Folder = search.Folder ?? string.Empty,
+					MaxItemCount = search.MaxItemCount
+				};
+				await provider.SearchAsync(request, results, searchCTS.Token);
+			}
+			else
+			{
+				await search.SearchAsync(results, searchCTS.Token);
+			}
 
 			filesAndFolders = new ConcurrentCollection<ListedItem>(results);
 

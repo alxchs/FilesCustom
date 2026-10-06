@@ -4779,4 +4779,19 @@
   <data name="Menu_Panes" xml:space="preserve">
     <value>Painéis</value>
   </data>
+  <data name="SearchEngine" xml:space="preserve">
+    <value>Motor de busca</value>
+  </data>
+  <data name="SearchEngineDescription" xml:space="preserve">
+    <value>Escolha o motor de busca usado para pesquisas no Files</value>
+  </data>
+  <data name="SearchEngine_Native" xml:space="preserve">
+    <value>Files Nativo (Windows Search / Win32)</value>
+  </data>
+  <data name="SearchEngine_AgentRansack" xml:space="preserve">
+    <value>Agent Ransack (Conteúdo e regex)</value>
+  </data>
+  <data name="SearchEngine_Everything" xml:space="preserve">
+    <value>Everything (Índice instantâneo)</value>
+  </data>
 </root>

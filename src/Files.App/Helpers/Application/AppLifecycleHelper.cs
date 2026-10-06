@@ -370,6 +370,8 @@ namespace Files.App.Helpers
 					.AddSingleton<IIconCacheService, IconCacheService>()
 					.AddSingleton<IStorageArchiveService, StorageArchiveService>()
 					.AddSingleton<ISearchProvider, NativeFilesSearchProvider>()
+					.AddSingleton<ISearchProvider, AgentRansackSearchProvider>()
+					.AddSingleton<ISearchProvider, EverythingSearchProvider>()
 					.AddSingleton<ISearchProviderFactory, SearchProviderFactory>()
 					.AddSingleton<IStorageSecurityService, StorageSecurityService>()
 					.AddSingleton<IWindowsCompatibilityService, WindowsCompatibilityService>()

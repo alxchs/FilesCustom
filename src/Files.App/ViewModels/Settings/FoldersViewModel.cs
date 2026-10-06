@@ -1,5 +1,4 @@
-// Copyright (c) Files Community
-// Licensed under the MIT License.
+using Files.App.Data.Enums;
 
 namespace Files.App.ViewModels.Settings
 {
@@ -10,6 +9,7 @@ namespace Files.App.ViewModels.Settings
 
 		public Dictionary<SizeUnitTypes, string> SizeUnitsOptions { get; private set; } = [];
 		public Dictionary<SingleClickOpenMode, string> SingleClickOpenModeOptions { get; private set; } = [];
+		public Dictionary<SearchEngineKind, string> SearchEngineOptions { get; private set; } = [];
 
 		public FoldersViewModel()
 		{
@@ -27,6 +27,32 @@ namespace Files.App.ViewModels.Settings
 			SelectedOpenFilesWithSingleClickOption = SingleClickOpenModeOptions[UserSettingsService.FoldersSettingsService.OpenFilesWithSingleClick];
 			SelectedOpenFoldersWithSingleClickOption = SingleClickOpenModeOptions[UserSettingsService.FoldersSettingsService.OpenFoldersWithSingleClick];
 			SelectedOpenFoldersInColumnsViewWithSingleClickOption = SingleClickOpenModeOptions[UserSettingsService.FoldersSettingsService.OpenFoldersInColumnsViewWithSingleClick];
+
+			// Search Engine format
+			SearchEngineOptions.Add(SearchEngineKind.Native, Strings.SearchEngine_Native.GetLocalizedResource());
+			SearchEngineOptions.Add(SearchEngineKind.AgentRansack, Strings.SearchEngine_AgentRansack.GetLocalizedResource());
+			SearchEngineOptions.Add(SearchEngineKind.Everything, Strings.SearchEngine_Everything.GetLocalizedResource());
+			selectedSearchEngineOption = SearchEngineOptions.TryGetValue(UserSettingsService.FoldersSettingsService.SearchEnginePreference, out var currentEngine)
+				? currentEngine
+				: SearchEngineOptions[SearchEngineKind.Native];
+		}
+
+		private string selectedSearchEngineOption = string.Empty;
+		public string SelectedSearchEngineOption
+		{
+			get => selectedSearchEngineOption;
+			set
+			{
+				if (SetProperty(ref selectedSearchEngineOption, value))
+				{
+					var match = SearchEngineOptions.FirstOrDefault(x => x.Value == value).Key;
+					if (UserSettingsService.FoldersSettingsService.SearchEnginePreference != match)
+					{
+						UserSettingsService.FoldersSettingsService.SearchEnginePreference = match;
+						OnPropertyChanged();
+					}
+				}
+			}
 		}
 
 		// Properties
