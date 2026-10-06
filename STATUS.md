@@ -27,8 +27,8 @@
 | F009 | Fontes separadas | CONCLUÍDO (T1..T5 concluídos, build 0/0, evidências em docs/agents/evidence/f009/) | feature/separate-fonts |
 | F002 | Colunas independentes | CONCLUÍDO (investigação e validação concluídas, colunas 100% independentes em pixels, evidências em docs/agents/evidence/f002/) | feature/independent-column-resize |
 | F010 | Todas as colunas do Explorer | FASE 1 CONCLUÍDA (868 propriedades mapeadas, benchmark real 1,3ms/prop, arquitetura em docs/architecture/explorer-columns.md, PENDING DECISION) | feature/all-explorer-columns |
-| F004 | Menu clássico | na fila (próxima a iniciar) | feature/classic-menu |
-| F006 | Infraestrutura de busca | na fila | feature/search-provider |
+| F004 | Menu clássico | CONCLUÍDO (MenuBar completa com 6 menus, Alt+keys, toggle em Settings > Appearance, build 0/0, evidências em docs/agents/evidence/f004/) | feature/classic-menu |
+| F006 | Infraestrutura de busca | na fila (próxima a iniciar) | feature/search-provider |
 | F011 | Escolha de motor de busca (Everything) | na fila | feature/search-engine-choice |
 
 ## Observações do ambiente (28/09/2026)

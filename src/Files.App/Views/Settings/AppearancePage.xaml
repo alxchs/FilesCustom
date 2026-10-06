@@ -330,6 +330,17 @@
 					AutomationProperties.Name="{helpers:ResourceString Name=ShowStatusBar}"
 					IsOn="{x:Bind ViewModel.ShowStatusBar, Mode=TwoWay}" />
 			</wctcontrols:SettingsCard>
+
+			<!--  Show Classic Menu Bar  -->
+			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=ShowClassicMenuBar}">
+				<wctcontrols:SettingsCard.HeaderIcon>
+					<FontIcon Glyph="&#xE700;" />
+				</wctcontrols:SettingsCard.HeaderIcon>
+				<ToggleSwitch
+					AutomationProperties.AutomationControlType="Custom"
+					AutomationProperties.Name="{helpers:ResourceString Name=ShowClassicMenuBar}"
+					IsOn="{x:Bind ViewModel.ShowClassicMenuBar, Mode=TwoWay}" />
+			</wctcontrols:SettingsCard>
 		</StackPanel>
 	</Grid>
 </Page>

@@ -4749,4 +4749,34 @@
   <data name="AppThemeFileAreaFontFamily" xml:space="preserve">
     <value>Fonte dos arquivos e colunas</value>
   </data>
+  <data name="ShowClassicMenuBar" xml:space="preserve">
+    <value>Mostrar barra de menus clássica</value>
+  </data>
+  <data name="ShowClassicMenuBarDescription" xml:space="preserve">
+    <value>Exibir a barra de menus tradicional com Arquivo, Editar, Exibir</value>
+  </data>
+  <data name="Menu_File" xml:space="preserve">
+    <value>Arquivo</value>
+  </data>
+  <data name="Menu_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Menu_View" xml:space="preserve">
+    <value>Exibir</value>
+  </data>
+  <data name="Menu_Go" xml:space="preserve">
+    <value>Ir</value>
+  </data>
+  <data name="Menu_Tools" xml:space="preserve">
+    <value>Ferramentas</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>Ajuda</value>
+  </data>
+  <data name="Menu_New" xml:space="preserve">
+    <value>Novo</value>
+  </data>
+  <data name="Menu_Panes" xml:space="preserve">
+    <value>Painéis</value>
+  </data>
 </root>

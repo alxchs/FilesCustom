@@ -4755,4 +4755,34 @@
   <data name="AppThemeFileAreaFontFamily" xml:space="preserve">
     <value>Files and columns font</value>
   </data>
+  <data name="ShowClassicMenuBar" xml:space="preserve">
+    <value>Show classic menu bar</value>
+  </data>
+  <data name="ShowClassicMenuBarDescription" xml:space="preserve">
+    <value>Display the traditional File, Edit, View menu bar</value>
+  </data>
+  <data name="Menu_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Menu_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Menu_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Menu_Go" xml:space="preserve">
+    <value>Go</value>
+  </data>
+  <data name="Menu_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Menu_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Menu_Panes" xml:space="preserve">
+    <value>Panes</value>
+  </data>
 </root>

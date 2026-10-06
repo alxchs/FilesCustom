@@ -1,0 +1,461 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<UserControl
+	x:Class="Files.App.UserControls.Menus.ClassicMenuBar"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d">
+
+	<MenuBar
+		x:Name="RootMenuBar"
+		HorizontalAlignment="Stretch"
+		VerticalAlignment="Center"
+		Background="Transparent"
+		Margin="4,0,4,0">
+
+		<!--  File Menu (Alt+F)  -->
+		<MenuBarItem AccessKey="F" Title="{helpers:ResourceString Name=Menu_File}">
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NewTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NewTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NewTab.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NewWindow, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NewWindow.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NewWindow.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=Menu_New}">
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.CreateFolder, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.CreateFolder.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.CreateFolder.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.CreateFile, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.CreateFile.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.CreateFile.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.CreateFolderWithSelection, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.CreateFolderWithSelection.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.CreateFolderWithSelection.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.CreateShortcutFromDialog, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.CreateShortcutFromDialog.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.CreateShortcutFromDialog.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenItem, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenItem.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenItem.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenInNewTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenInNewTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenInNewTab.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenInNewWindow, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenInNewWindow.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenInNewWindow.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenInNewPane, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenInNewPane.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenInNewPane.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenTerminal, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenTerminal.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenTerminal.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenTerminalAsAdmin, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenTerminalAsAdmin.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenTerminalAsAdmin.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.Rename, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.Rename.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.Rename.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.DeleteItem, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.DeleteItem.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.DeleteItem.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.DeleteItemPermanently, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.DeleteItemPermanently.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.DeleteItemPermanently.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenProperties, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenProperties.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenProperties.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenClassicProperties, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenClassicProperties.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenClassicProperties.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CloseSelectedTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CloseSelectedTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CloseSelectedTab.Label, Mode=OneWay}" />
+		</MenuBarItem>
+
+		<!--  Edit Menu (Alt+E)  -->
+		<MenuBarItem AccessKey="E" Title="{helpers:ResourceString Name=Menu_Edit}">
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.Undo, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.Undo.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.Undo.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.Redo, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.Redo.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.Redo.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CutItem, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CutItem.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CutItem.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CopyItem, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CopyItem.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CopyItem.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.PasteItem, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.PasteItem.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.PasteItem.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.PasteItemAsShortcut, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.PasteItemAsShortcut.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.PasteItemAsShortcut.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CopyPath, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CopyPath.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CopyPath.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CopyPathWithQuotes, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CopyPathWithQuotes.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CopyPathWithQuotes.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.SelectAll, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.SelectAll.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.SelectAll.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.InvertSelection, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.InvertSelection.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.InvertSelection.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.ClearSelection, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ClearSelection.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ClearSelection.Label, Mode=OneWay}" />
+		</MenuBarItem>
+
+		<!--  View Menu (Alt+V)  -->
+		<MenuBarItem AccessKey="V" Title="{helpers:ResourceString Name=Menu_View}">
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=Layout}">
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.LayoutDetails, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.LayoutDetails.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.LayoutDetails.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.LayoutDetails.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.LayoutGrid, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.LayoutGrid.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.LayoutGrid.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.LayoutGrid.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.LayoutColumns, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.LayoutColumns.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.LayoutColumns.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.LayoutColumns.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.LayoutAdaptive, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.LayoutAdaptive.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.LayoutAdaptive.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.LayoutAdaptive.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=SortBy}">
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.SortByName, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.SortByName.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.SortByName.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.SortByName.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.SortByDateModified, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.SortByDateModified.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.SortByDateModified.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.SortByDateModified.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.SortBySize, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.SortBySize.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.SortBySize.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.SortBySize.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.SortByType, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.SortByType.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.SortByType.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.SortByType.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=GroupBy}">
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.GroupByNone, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.GroupByNone.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GroupByNone.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GroupByNone.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.GroupByName, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.GroupByName.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GroupByName.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GroupByName.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.GroupByDateModified, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.GroupByDateModified.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GroupByDateModified.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GroupByDateModified.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=Menu_Panes}">
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.TogglePreviewPane, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.TogglePreviewPane.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.TogglePreviewPane.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.TogglePreviewPane.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.ToggleDetailsPane, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.ToggleDetailsPane.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleDetailsPane.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.ToggleDetailsPane.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.ToggleInfoPane, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.ToggleInfoPane.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleInfoPane.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.ToggleInfoPane.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.ToggleDualPane, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.ToggleDualPane.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleDualPane.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.ToggleDualPane.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.ToggleSidebar, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.ToggleSidebar.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleSidebar.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.ToggleSidebar.Label, Mode=OneWay}" />
+				<ToggleMenuFlyoutItem
+					Command="{x:Bind Commands.ToggleToolbar, Mode=OneWay}"
+					IsChecked="{x:Bind Commands.ToggleToolbar.IsOn, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleToolbar.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.ToggleToolbar.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSeparator />
+
+			<ToggleMenuFlyoutItem
+				Command="{x:Bind Commands.ToggleShowHiddenItems, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.ToggleShowHiddenItems.IsOn, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleShowHiddenItems.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ToggleShowHiddenItems.Label, Mode=OneWay}" />
+			<ToggleMenuFlyoutItem
+				Command="{x:Bind Commands.ToggleShowFileExtensions, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.ToggleShowFileExtensions.IsOn, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleShowFileExtensions.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ToggleShowFileExtensions.Label, Mode=OneWay}" />
+			<ToggleMenuFlyoutItem
+				Command="{x:Bind Commands.ToggleDotFilesSetting, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.ToggleDotFilesSetting.IsOn, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleDotFilesSetting.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ToggleDotFilesSetting.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.AutoFitColumns, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.AutoFitColumns.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.AutoFitColumns.Label, Mode=OneWay}" />
+			<ToggleMenuFlyoutItem
+				Command="{x:Bind Commands.ToggleFullScreen, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.ToggleFullScreen.IsOn, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleFullScreen.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ToggleFullScreen.Label, Mode=OneWay}" />
+			<ToggleMenuFlyoutItem
+				Command="{x:Bind Commands.ToggleCompactOverlay, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.ToggleCompactOverlay.IsOn, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ToggleCompactOverlay.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ToggleCompactOverlay.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.RefreshItems, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.RefreshItems.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.RefreshItems.Label, Mode=OneWay}" />
+		</MenuBarItem>
+
+		<!--  Go Menu (Alt+G)  -->
+		<MenuBarItem AccessKey="G" Title="{helpers:ResourceString Name=Menu_Go}">
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NavigateBack, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NavigateBack.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NavigateBack.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NavigateForward, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NavigateForward.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NavigateForward.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NavigateUp, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NavigateUp.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NavigateUp.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NavigateHome, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NavigateHome.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NavigateHome.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.DuplicateSelectedTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.DuplicateSelectedTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.DuplicateSelectedTab.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.ReopenClosedTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.ReopenClosedTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.ReopenClosedTab.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.NextTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.NextTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.NextTab.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.PreviousTab, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.PreviousTab.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.PreviousTab.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.FocusOtherPane, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.FocusOtherPane.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.FocusOtherPane.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenCurrentFolderInOtherPane, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenCurrentFolderInOtherPane.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenCurrentFolderInOtherPane.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.EditPath, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.EditPath.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.EditPath.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.Search, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.Search.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.Search.Label, Mode=OneWay}" />
+		</MenuBarItem>
+
+		<!--  Tools Menu (Alt+T)  -->
+		<MenuBarItem AccessKey="T" Title="{helpers:ResourceString Name=Menu_Tools}">
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenCommandPalette, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenCommandPalette.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenCommandPalette.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutSubItem Text="{helpers:ResourceString Name=Git}">
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitSync, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitSync.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitSync.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitPull, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitPull.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitPull.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitPush, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitPush.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitPush.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitFetch, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitFetch.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitFetch.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitClone, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitClone.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitClone.Label, Mode=OneWay}" />
+				<MenuFlyoutItem
+					Command="{x:Bind Commands.GitInit, Mode=OneWay}"
+					KeyboardAcceleratorTextOverride="{x:Bind Commands.GitInit.HotKeyText, Mode=OneWay}"
+					Text="{x:Bind Commands.GitInit.Label, Mode=OneWay}" />
+			</MenuFlyoutSubItem>
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenInIDE, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenInIDE.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenInIDE.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenRepoInIDE, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenRepoInIDE.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenRepoInIDE.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.EditInNotepad, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.EditInNotepad.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.EditInNotepad.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.CustomizeToolbar, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.CustomizeToolbar.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.CustomizeToolbar.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenSettings, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenSettings.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenSettings.Label, Mode=OneWay}" />
+		</MenuBarItem>
+
+		<!--  Help Menu (Alt+H)  -->
+		<MenuBarItem AccessKey="H" Title="{helpers:ResourceString Name=Menu_Help}">
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenHelp, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenHelp.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenHelp.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenReleaseNotes, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenReleaseNotes.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenReleaseNotes.Label, Mode=OneWay}" />
+
+			<MenuFlyoutSeparator />
+
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenLogFile, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenLogFile.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenLogFile.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenLogFileLocation, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenLogFileLocation.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenLogFileLocation.Label, Mode=OneWay}" />
+			<MenuFlyoutItem
+				Command="{x:Bind Commands.OpenSettingsFile, Mode=OneWay}"
+				KeyboardAcceleratorTextOverride="{x:Bind Commands.OpenSettingsFile.HotKeyText, Mode=OneWay}"
+				Text="{x:Bind Commands.OpenSettingsFile.Label, Mode=OneWay}" />
+		</MenuBarItem>
+	</MenuBar>
+</UserControl>

@@ -409,6 +409,20 @@ namespace Files.App.ViewModels.Settings
 			}
 		}
 
+		public bool ShowClassicMenuBar
+		{
+			get => UserSettingsService.AppearanceSettingsService.ShowClassicMenuBar;
+			set
+			{
+				if (value != UserSettingsService.AppearanceSettingsService.ShowClassicMenuBar)
+				{
+					UserSettingsService.AppearanceSettingsService.ShowClassicMenuBar = value;
+
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public bool ShowToolbar
 		{
 			get => UserSettingsService.AppearanceSettingsService.ShowToolbar;

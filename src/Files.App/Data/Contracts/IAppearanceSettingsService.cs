@@ -104,6 +104,11 @@ namespace Files.App.Data.Contracts
 		HorizontalAlignment AppThemeBackgroundImageHorizontalAlignment { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value whether the classic menu bar should be displayed.
+		/// </summary>
+		bool ShowClassicMenuBar { get; set; }
+
+		/// <summary>
 		/// Gets or sets a value whether the toolbar should be displayed.
 		/// </summary>
 		bool ShowToolbar { get; set; }

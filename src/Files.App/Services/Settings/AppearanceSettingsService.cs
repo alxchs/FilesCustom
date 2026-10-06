@@ -140,6 +140,13 @@ namespace Files.App.Services.Settings
 		}
 
 		/// <inheritdoc/>
+		public bool ShowClassicMenuBar
+		{
+			get => Get(false);
+			set => Set(value);
+		}
+
+		/// <inheritdoc/>
 		public bool ShowToolbar
 		{
 			get => Get(true);

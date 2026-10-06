@@ -118,6 +118,9 @@ namespace Files.App.ViewModels
 		public HorizontalAlignment AppThemeBackgroundImageHorizontalAlignment
 			=> AppearanceSettingsService.AppThemeBackgroundImageHorizontalAlignment;
 
+		public bool ShowClassicMenuBar =>
+			AppearanceSettingsService.ShowClassicMenuBar;
+
 		public bool ShowToolbar =>
 			AppearanceSettingsService.ShowToolbar &&
 			context.PageType is not ContentPageTypes.Home &&
@@ -210,6 +213,9 @@ namespace Files.App.ViewModels
 						break;
 					case nameof(AppearanceSettingsService.ShowToolbar):
 						OnPropertyChanged(nameof(ShowToolbar));
+						break;
+					case nameof(AppearanceSettingsService.ShowClassicMenuBar):
+						OnPropertyChanged(nameof(ShowClassicMenuBar));
 						break;
 				}
 			};
